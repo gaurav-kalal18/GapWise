@@ -1,11 +1,26 @@
+# Dependencies
 node_modules/
+
+# Environment variables / secrets
 .env
+.env.*
+!.env.example
+
+# Python
 .venv/
+venv/
 __pycache__/
 *.pyc
 
+# Build output
 dist/
 build/
 
+# Uploads and logs
 uploads/
 *.log
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
