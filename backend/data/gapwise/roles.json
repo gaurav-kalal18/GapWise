@@ -1,0 +1,122 @@
+[
+  {
+    "id": "role:software-engineer",
+    "name": "Software Engineer",
+    "description": "Designs, develops, tests, debugs, and maintains software systems.",
+    "occupationMappings": [
+      {
+        "occupationId": "occupation:esco:f2b15a0e-e65a-438a-affb-29b9d50b77d1",
+        "relation": "primary"
+      }
+    ],
+    "sources": [
+      {
+        "provider": "gapwise",
+        "sourceId": "role:software-engineer",
+        "version": "1.0"
+      }
+    ]
+  },
+  {
+    "id": "role:backend-developer",
+    "name": "Backend Developer",
+    "description": "Develops server-side applications, APIs, services, and backend systems.",
+    "occupationMappings": [
+      {
+        "occupationId": "occupation:esco:f2b15a0e-e65a-438a-affb-29b9d50b77d1",
+        "relation": "primary"
+      },
+      {
+        "occupationId": "occupation:esco:781a6350-e686-45b9-b075-e4c8d5a05ff7",
+        "relation": "supporting"
+      }
+    ],
+    "sources": [
+      {
+        "provider": "gapwise",
+        "sourceId": "role:backend-developer",
+        "version": "1.0"
+      }
+    ]
+  },
+  {
+    "id": "role:frontend-developer",
+    "name": "Frontend Developer",
+    "description": "Develops user-facing web interfaces and client-side applications.",
+    "occupationMappings": [
+      {
+        "occupationId": "occupation:esco:c40a2919-48a9-40ea-b506-1f34f693496d",
+        "relation": "primary"
+      }
+    ],
+    "sources": [
+      {
+        "provider": "gapwise",
+        "sourceId": "role:frontend-developer",
+        "version": "1.0"
+      }
+    ]
+  },
+  {
+    "id": "role:full-stack-developer",
+    "name": "Full Stack Developer",
+    "description": "Develops both client-side interfaces and server-side applications.",
+    "occupationMappings": [
+      {
+        "occupationId": "occupation:esco:f2b15a0e-e65a-438a-affb-29b9d50b77d1",
+        "relation": "primary"
+      },
+      {
+        "occupationId": "occupation:esco:c40a2919-48a9-40ea-b506-1f34f693496d",
+        "relation": "supporting"
+      }
+    ],
+    "sources": [
+      {
+        "provider": "gapwise",
+        "sourceId": "role:full-stack-developer",
+        "version": "1.0"
+      }
+    ]
+  },
+  {
+    "id": "role:data-scientist",
+    "name": "Data Scientist",
+    "description": "Uses statistical, computational, and machine learning techniques to analyze data and build data-driven solutions.",
+    "occupationMappings": [
+      {
+        "occupationId": "occupation:esco:258e46f9-0075-4a2e-adae-1ff0477e0f30",
+        "relation": "primary"
+      }
+    ],
+    "sources": [
+      {
+        "provider": "gapwise",
+        "sourceId": "role:data-scientist",
+        "version": "1.0"
+      }
+    ]
+  },
+  {
+    "id": "role:ml-engineer",
+    "name": "ML Engineer",
+    "description": "Builds, integrates, deploys, and maintains machine learning systems and software.",
+    "occupationMappings": [
+      {
+        "occupationId": "occupation:esco:f2b15a0e-e65a-438a-affb-29b9d50b77d1",
+        "relation": "primary"
+      },
+      {
+        "occupationId": "occupation:esco:258e46f9-0075-4a2e-adae-1ff0477e0f30",
+        "relation": "supporting"
+      }
+    ],
+    "sources": [
+      {
+        "provider": "gapwise",
+        "sourceId": "role:ml-engineer",
+        "version": "1.0"
+      }
+    ]
+  }
+]

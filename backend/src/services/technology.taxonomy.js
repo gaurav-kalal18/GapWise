@@ -1,0 +1,221 @@
+const technologyTaxonomy = [
+    {
+        id: "tech:javascript",
+        canonicalName: "JavaScript",
+        category: "programming-language",
+        aliases: [
+            "javascript",
+            "js"
+        ]
+    },
+
+    {
+        id: "tech:typescript",
+        canonicalName: "TypeScript",
+        category: "programming-language",
+        aliases: [
+            "typescript",
+            "ts"
+        ]
+    },
+
+    {
+        id: "tech:python",
+        canonicalName: "Python",
+        category: "programming-language",
+        aliases: [
+            "python"
+        ]
+    },
+
+    {
+        id: "tech:java",
+        canonicalName: "Java",
+        category: "programming-language",
+        aliases: [
+            "java"
+        ]
+    },
+
+    {
+        id: "tech:cpp",
+        canonicalName: "C++",
+        category: "programming-language",
+        aliases: [
+            "c++",
+            "cpp"
+        ]
+    },
+
+    {
+        id: "tech:react",
+        canonicalName: "React",
+        category: "framework-library",
+        aliases: [
+            "react",
+            "react.js",
+            "reactjs"
+        ]
+    },
+
+    {
+        id: "tech:nodejs",
+        canonicalName: "Node.js",
+        category: "runtime",
+        aliases: [
+            "node.js",
+            "nodejs",
+            "node"
+        ]
+    },
+
+    {
+        id: "tech:express",
+        canonicalName: "Express.js",
+        category: "framework",
+        aliases: [
+            "express.js",
+            "expressjs",
+            "express"
+        ]
+    },
+
+    {
+        id: "tech:mongodb",
+        canonicalName: "MongoDB",
+        category: "database",
+        aliases: [
+            "mongodb",
+            "mongo db"
+        ]
+    },
+
+    {
+        id: "tech:postgresql",
+        canonicalName: "PostgreSQL",
+        category: "database",
+        aliases: [
+            "postgresql",
+            "postgres"
+        ]
+    },
+
+    {
+    id: "tech:sql",
+    canonicalName: "SQL",
+    category: "database",
+    aliases: [
+        "sql",
+        "structured query language"
+    ]
+},
+
+    {
+        id: "tech:mysql",
+        canonicalName: "MySQL",
+        category: "database",
+        aliases: [
+            "mysql"
+        ]
+    },
+
+    {
+        id: "tech:redis",
+        canonicalName: "Redis",
+        category: "database",
+        aliases: [
+            "redis"
+        ]
+    },
+
+    {
+        id: "tech:docker",
+        canonicalName: "Docker",
+        category: "devops",
+        aliases: [
+            "docker"
+        ]
+    },
+
+    {
+        id: "tech:kubernetes",
+        canonicalName: "Kubernetes",
+        category: "devops",
+        aliases: [
+            "kubernetes",
+            "k8s"
+        ]
+    },
+
+    {
+        id: "tech:git",
+        canonicalName: "Git",
+        category: "developer-tool",
+        aliases: [
+            "git"
+        ]
+    },
+
+    {
+        id: "tech:github",
+        canonicalName: "GitHub",
+        category: "developer-platform",
+        aliases: [
+            "github"
+        ]
+    },
+
+    {
+        id: "tech:rest-api",
+        canonicalName: "REST API",
+        category: "api",
+        aliases: [
+            "rest api",
+            "restful api",
+            "restful apis",
+            "rest apis"
+        ]
+    },
+
+    {
+        id: "tech:graphql",
+        canonicalName: "GraphQL",
+        category: "api",
+        aliases: [
+            "graphql"
+        ]
+    },
+
+    {
+        id: "tech:aws",
+        canonicalName: "AWS",
+        category: "cloud-platform",
+        aliases: [
+            "aws",
+            "amazon web services"
+        ]
+    },
+
+    {
+        id: "tech:azure",
+        canonicalName: "Microsoft Azure",
+        category: "cloud-platform",
+        aliases: [
+            "azure",
+            "microsoft azure"
+        ]
+    },
+
+    {
+        id: "tech:gcp",
+        canonicalName: "Google Cloud",
+        category: "cloud-platform",
+        aliases: [
+            "gcp",
+            "google cloud",
+            "google cloud platform"
+        ]
+    }
+];
+
+module.exports = technologyTaxonomy;

@@ -1,0 +1,179 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GapWise Canonical Skill",
+  "description": "Canonical internal representation of a skill used by GapWise.",
+  "type": "object",
+
+  "required": [
+    "id",
+    "canonicalName",
+    "skillType",
+    "aliases",
+    "categories",
+    "relations",
+    "prerequisites",
+    "occupations",
+    "sources",
+    "metadata"
+  ],
+
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+
+    "canonicalName": {
+      "type": "string",
+      "minLength": 1
+    },
+
+    "description": {
+      "type": "string"
+    },
+
+   "skillType": {
+  "type": "string"
+},
+
+    "aliases": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+
+    "categories": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+
+    "relations": {
+  "type": "object",
+  "required": [
+    "broader",
+    "narrower",
+    "related",
+    "essential",
+    "optional"
+  ],
+  "properties": {
+    "broader": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "narrower": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "related": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "essential": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "optional": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+},
+    "prerequisites": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+
+  "occupations": {
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": [
+      "occupationId",
+      "occupationName",
+      "importance"
+    ],
+    "properties": {
+      "occupationId": {
+        "type": "string"
+      },
+      "occupationName": {
+        "type": "string"
+      },
+      "importance": {
+        "type": "string",
+        "enum": [
+          "essential",
+          "optional"
+        ]
+      }
+    }
+  }
+},
+
+    "sources": {
+      "type": "array",
+
+      "items": {
+        "type": "object",
+
+        "required": [
+          "provider",
+          "sourceId",
+          "version"
+        ],
+
+        "properties": {
+          "provider": {
+            "type": "string"
+          },
+
+          "sourceId": {
+            "type": "string"
+          },
+
+          "version": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "metadata": {
+      "type": "object",
+
+      "required": [
+        "language",
+        "status"
+      ],
+
+      "properties": {
+        "language": {
+          "type": "string"
+        },
+
+        "status": {
+          "type": "string",
+          "enum": [
+            "active",
+            "deprecated"
+          ]
+        }
+      }
+    }
+  }
+}
