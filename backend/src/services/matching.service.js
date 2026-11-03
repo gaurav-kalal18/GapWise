@@ -20,10 +20,32 @@ const normalizeSkill = (skill) => {
     return null;
 };
 
+const getSkillId = (skill) => {
+    if (!skill || typeof skill !== "object") {
+        return null;
+    }
+
+    return (
+        skill.canonicalSkillId ||
+        skill.skillId ||
+        null
+    );
+};
+
 // Get the original candidate skill object
 const getCandidateSkillObject = (candidateSkills, skillName) => {
     return candidateSkills.find(
         (skill) => normalizeSkill(skill) === skillName
+    );
+};
+
+const getCandidateSkillById = (candidateSkills, skillId) => {
+    if (!skillId) {
+        return null;
+    }
+
+    return candidateSkills.find(
+        (skill) => getSkillId(skill) === skillId
     );
 };
 
@@ -93,7 +115,7 @@ const findRelatedSkill = (candidateSkills, requiredSkill) => {
 };
 
 const matchSkills = (candidateSkills, requiredSkills) => {
-
+       
     const normalizedCandidateSkills =
         candidateSkills
             .map(normalizeSkill)

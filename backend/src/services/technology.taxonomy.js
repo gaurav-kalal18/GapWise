@@ -1,4 +1,8 @@
 const technologyTaxonomy = [
+    // --------------------------------------------------
+    // Programming Languages
+    // --------------------------------------------------
+
     {
         id: "tech:javascript",
         canonicalName: "JavaScript",
@@ -47,6 +51,36 @@ const technologyTaxonomy = [
         ]
     },
 
+
+    // --------------------------------------------------
+    // Web Technologies
+    // --------------------------------------------------
+
+    {
+        id: "tech:html",
+        canonicalName: "HTML",
+        category: "web-technology",
+        aliases: [
+            "html",
+            "html5"
+        ]
+    },
+
+    {
+        id: "tech:css",
+        canonicalName: "CSS",
+        category: "web-technology",
+        aliases: [
+            "css",
+            "css3"
+        ]
+    },
+
+
+    // --------------------------------------------------
+    // Frameworks / Libraries / Runtime
+    // --------------------------------------------------
+
     {
         id: "tech:react",
         canonicalName: "React",
@@ -80,6 +114,11 @@ const technologyTaxonomy = [
         ]
     },
 
+
+    // --------------------------------------------------
+    // Databases
+    // --------------------------------------------------
+
     {
         id: "tech:mongodb",
         canonicalName: "MongoDB",
@@ -101,14 +140,14 @@ const technologyTaxonomy = [
     },
 
     {
-    id: "tech:sql",
-    canonicalName: "SQL",
-    category: "database",
-    aliases: [
-        "sql",
-        "structured query language"
-    ]
-},
+        id: "tech:sql",
+        canonicalName: "SQL",
+        category: "database",
+        aliases: [
+            "sql",
+            "structured query language"
+        ]
+    },
 
     {
         id: "tech:mysql",
@@ -127,6 +166,11 @@ const technologyTaxonomy = [
             "redis"
         ]
     },
+
+
+    // --------------------------------------------------
+    // DevOps / Infrastructure
+    // --------------------------------------------------
 
     {
         id: "tech:docker",
@@ -147,6 +191,11 @@ const technologyTaxonomy = [
         ]
     },
 
+
+    // --------------------------------------------------
+    // Developer Tools / Platforms
+    // --------------------------------------------------
+
     {
         id: "tech:git",
         canonicalName: "Git",
@@ -164,6 +213,21 @@ const technologyTaxonomy = [
             "github"
         ]
     },
+
+    {
+        id: "tech:prisma",
+        canonicalName: "Prisma",
+        category: "orm",
+        aliases: [
+            "prisma",
+            "prisma orm"
+        ]
+    },
+
+
+    // --------------------------------------------------
+    // APIs
+    // --------------------------------------------------
 
     {
         id: "tech:rest-api",
@@ -185,6 +249,11 @@ const technologyTaxonomy = [
             "graphql"
         ]
     },
+
+
+    // --------------------------------------------------
+    // Cloud Platforms
+    // --------------------------------------------------
 
     {
         id: "tech:aws",
@@ -214,6 +283,29 @@ const technologyTaxonomy = [
             "gcp",
             "google cloud",
             "google cloud platform"
+        ]
+    },
+
+
+    // --------------------------------------------------
+    // Deployment Platforms
+    // --------------------------------------------------
+
+    {
+        id: "tech:vercel",
+        canonicalName: "Vercel",
+        category: "deployment-platform",
+        aliases: [
+            "vercel"
+        ]
+    },
+
+    {
+        id: "tech:render",
+        canonicalName: "Render",
+        category: "deployment-platform",
+        aliases: [
+            "render"
         ]
     }
 ];

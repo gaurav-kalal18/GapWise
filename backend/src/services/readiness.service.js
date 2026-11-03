@@ -32,15 +32,9 @@ const calculateReadiness = (matches, gaps) => {
 
         totalWeight += weight;
 
-
         /*
-         * Only a satisfied requirement contributes
-         * to the achieved readiness score.
-         *
-         * Example:
-         *
-         * JavaScript → exact → satisfied
-         * PostgreSQL → SQL → related but NOT satisfied
+         * Only fully satisfied requirements
+         * contribute to the current readiness score.
          */
 
         if (match.satisfiesRequirement) {
@@ -50,9 +44,8 @@ const calculateReadiness = (matches, gaps) => {
         } else if (match.matchScore > 0) {
 
             /*
-             * Preserve partial evidence separately.
-             *
-             * This does NOT increase readiness yet.
+             * Partial evidence is tracked separately.
+             * It does not currently increase readiness.
              */
 
             partialEvidenceWeight +=
@@ -74,17 +67,9 @@ const calculateReadiness = (matches, gaps) => {
 
         totalWeight += weight;
 
-
         /*
-         * A gap does not contribute to achieved
-         * readiness, even if related evidence exists.
-         *
-         * Example:
-         *
-         * React
-         * candidate has JavaScript
-         *
-         * Still a React gap.
+         * Related evidence does not currently
+         * satisfy the requirement.
          */
 
         if (
@@ -98,7 +83,7 @@ const calculateReadiness = (matches, gaps) => {
 
 
     // ------------------------------------------------
-    // Calculate readiness
+    // Calculate overall readiness
     // ------------------------------------------------
 
     const score =
@@ -155,6 +140,33 @@ const calculateReadiness = (matches, gaps) => {
 
 
     // ------------------------------------------------
+    // Coverage metrics
+    // ------------------------------------------------
+
+    const totalRequired =
+        requiredMatches + requiredGaps;
+
+    const totalPreferred =
+        preferredMatches + preferredGaps;
+
+
+    const requiredCoverage =
+        totalRequired === 0
+            ? 100
+            : Math.round(
+                (requiredMatches / totalRequired) * 100
+            );
+
+
+    const preferredCoverage =
+        totalPreferred === 0
+            ? 100
+            : Math.round(
+                (preferredMatches / totalPreferred) * 100
+            );
+
+
+    // ------------------------------------------------
     // Return readiness analysis
     // ------------------------------------------------
 
@@ -171,6 +183,9 @@ const calculateReadiness = (matches, gaps) => {
 
             preferredMatches,
             preferredGaps,
+
+            requiredCoverage,
+            preferredCoverage,
 
             partialEvidence:
                 partialEvidenceWeight > 0

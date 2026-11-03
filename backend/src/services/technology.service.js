@@ -33,8 +33,8 @@ const getSentence = (text, start, end) => {
     }
 
     const afterMatch = afterText.match(
-        /[.!?](?:\s+|$)/
-    );
+    /[.!?](?:\s+|$)/
+);
 
     let sentenceEnd = text.length;
 

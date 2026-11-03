@@ -8,7 +8,9 @@ const buildCandidateProfile = (resume) => {
         education: sections.education || "",
 
         skills: skills.map((skill) => ({
-            name: skill.name,
+            skillId: skill.skillId,
+            canonicalName: skill.canonicalName,
+            source: skill.source,
             confidence: skill.confidence,
             confidenceLevel: skill.confidenceLevel,
             evidence: skill.evidence

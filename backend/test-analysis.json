@@ -1,0 +1,87 @@
+{
+  "candidateProfile": {
+    "skills": [
+      {
+        "skillId": "JavaScript",
+        "canonicalName": "JavaScript",
+        "source": "gapwise-technology",
+        "confidence": 0.9,
+        "confidenceLevel": "strong",
+        "evidence": ["Technical Skills"]
+      },
+      {
+        "skillId": "React",
+        "canonicalName": "React",
+        "source": "gapwise-technology",
+        "confidence": 1,
+        "confidenceLevel": "strong",
+        "evidence": ["Technical Skills", "Projects"]
+      },
+      {
+        "skillId": "Node.js",
+        "canonicalName": "Node.js",
+        "source": "gapwise-technology",
+        "confidence": 1,
+        "confidenceLevel": "strong",
+        "evidence": ["Technical Skills", "Projects"]
+      },
+      {
+        "skillId": "SQL",
+        "canonicalName": "SQL",
+        "source": "gapwise-technology",
+        "confidence": 0.9,
+        "confidenceLevel": "strong",
+        "evidence": ["Technical Skills"]
+      },
+      {
+        "skillId": "tech:docker",
+        "canonicalName": "Docker",
+        "source": "gapwise-technology",
+        "confidence": 1,
+        "confidenceLevel": "strong",
+        "evidence": ["Technical Skills", "Projects"]
+      },
+      {
+        "skillId": "tech:postgresql",
+        "canonicalName": "PostgreSQL",
+        "source": "gapwise-technology",
+        "confidence": 1,
+        "confidenceLevel": "strong",
+        "evidence": ["Technical Skills", "Projects"]
+      }
+    ]
+  },
+
+  "jobProfile": {
+    "requiredSkills": [
+      {
+        "canonicalName": "JavaScript",
+        "requirementType": "required"
+      },
+      {
+        "canonicalName": "React",
+        "requirementType": "required"
+      },
+      {
+        "canonicalName": "Node.js",
+        "requirementType": "required"
+      },
+      {
+        "canonicalName": "SQL",
+        "requirementType": "required"
+      },
+      {
+        "canonicalName": "AWS",
+        "requirementType": "required"
+      },
+      {
+        "canonicalName": "Docker",
+        "requirementType": "required"
+      },
+      {
+        "canonicalName": "Kubernetes",
+        "requirementType": "preferred"
+      }
+    ]
+  }
+}
