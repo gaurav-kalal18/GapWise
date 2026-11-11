@@ -1,116 +1,18 @@
-const cleanResumeText = (text) => {
-    if (!text) {
-        return "";
-    }
-
-    return text
-        // Normalize line endings
-        .replace(/\r\n/g, "\n")
-        .replace(/\r/g, "\n")
-
-        // Remove excessive spaces
-        .replace(/[ \t]+/g, " ")
-
-        // Remove excessive blank lines
-        .replace(/\n{3,}/g, "\n\n")
-
-        // Clean spaces around newlines
-        .replace(/ *\n */g, "\n")
-
-        .trim();
+const cleanResumeText = text => String(text || '').replace(/\r\n?/g,'\n').replace(/[ \t]+/g,' ').replace(/\n{3,}/g,'\n\n').replace(/ *\n */g,'\n').trim();
+const headings = {
+ education:/^education\s*:?$/i, skills:/^(?:technical |professional )?skills\s*:?$/i, projects:/^(?:personal |academic |selected |technical )?projects\s*:?$/i,
+ experience:/^(?:(?:work|professional|internship|relevant) )?experience\s*:?$/i, achievements:/^(?:achievements|awards(?: and achievements)?)\s*:?$/i,
+ coursework:/^(?:relevant )?coursework\s*:?$/i, codingProfiles:/^(?:coding|competitive programming) profiles\s*:?$/i,
+ positions:/^(?:positions? of responsibility|leadership(?: experience)?)\s*:?$/i
 };
-
-
-const detectSections = (text) => {
-    const sections = {
-        contact: "",
-        education: "",
-        skills: "",
-        projects: "",
-        experience: "",
-        achievements: "",
-        coursework: "",
-        codingProfiles: "",
-        positions: "",
-        other: ""
-    };
-
-    const sectionPatterns = [
-        { name: "education", pattern: /\bEducation\b/i },
-        { name: "coursework", pattern: /\bRelevant Coursework\b/i },
-        { name: "skills", pattern: /\bTechnical Skills\b/i },
-        { name: "projects", pattern: /\bProjects\b/i },
-        { name: "experience", pattern: /\b(?:Experience|Work Experience)\b/i },
-        { name: "achievements", pattern: /\bAchievements\b/i },
-        { name: "codingProfiles", pattern: /\bCoding Profiles\b/i },
-        { name: "positions", pattern: /\bPosition of Responsibility\b/i }
-    ];
-
-    let currentSection = "contact";
-
-    const lines = text.split("\n");
-
-    for (const line of lines) {
-        const trimmedLine = line.trim();
-
-        if (!trimmedLine) {
-            continue;
-        }
-
-        let detectedSection = null;
-
-        for (const section of sectionPatterns) {
-            if (section.pattern.test(trimmedLine)) {
-                detectedSection = section.name;
-                break;
-            }
-        }
-
-        if (detectedSection) {
-
-            const sectionPattern = sectionPatterns.find(
-                (section) => section.name === detectedSection
-            ).pattern;
-
-            const remainingText = trimmedLine
-                .replace(sectionPattern, "")
-                .trim();
-
-            currentSection = detectedSection;
-
-            if (remainingText) {
-                sections[currentSection] += remainingText + "\n";
-            }
-
-            continue;
-        }
-
-        sections[currentSection] += trimmedLine + "\n";
-    }
-
-    // Remove trailing whitespace
-    Object.keys(sections).forEach((section) => {
-        sections[section] = sections[section].trim();
-    });
-
-    return sections;
-};
-
-
-const extractResumeStructure = (text) => {
-    const cleanedText = cleanResumeText(text);
-
-    const sections = detectSections(cleanedText);
-
-    return {
-        cleanedText,
-        sections
-    };
-};
-
-
-module.exports = {
-    cleanResumeText,
-    detectSections,
-    extractResumeStructure
-};
+function detectSections(text){
+ const sections={contact:'',education:'',skills:'',projects:'',experience:'',achievements:'',coursework:'',codingProfiles:'',positions:'',other:''};let current='contact';
+ for(const raw of String(text||'').split('\n')){const line=raw.trim();if(!line)continue;
+  const inline=line.match(/^(?:relevant )?coursework\s*:\s*(.+)$/i);if(inline){current='coursework';sections[current]+=inline[1]+'\n';continue;}
+  const heading=Object.keys(headings).find(key=>headings[key].test(line));if(heading){current=heading;continue;}
+  sections[current]+=line+'\n';
+ }
+ for(const key of Object.keys(sections))sections[key]=sections[key].trim();return sections;
+}
+const extractResumeStructure=text=>{const cleanedText=cleanResumeText(text);return {cleanedText,sections:detectSections(cleanedText)};};
+module.exports={cleanResumeText,detectSections,extractResumeStructure};
