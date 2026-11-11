@@ -44,6 +44,7 @@ function evaluateAlternatives(candidateSkills, requirement) {
 
 function analyzeResolvedCandidate(candidateSkills, jobProfile, candidateProfile = {}) {
   if (isRubricProfile(jobProfile)) return analyzeRubric(candidateProfile, jobProfile, candidateSkills);
+  if (jobProfile?.assessment?.type === 'gapwise-custom-jd') return require('./jd.assessment.service').analyzeJD(candidateProfile, jobProfile, candidateSkills);
   const requiredSkills = jobProfile.requiredSkills || [];
   const regular = requiredSkills.filter(r => !r || !Array.isArray(r.anyOf));
   const alternate = requiredSkills.filter(r => r && Array.isArray(r.anyOf));

@@ -93,7 +93,7 @@ function TargetRole() {
         profile = response.data.jobProfile;
       }
 
-      if (!profile?.requiredSkills?.length) {
+      if (!profile?.requiredSkills?.length && profile?.assessment?.type !== 'gapwise-custom-jd') {
         throw new Error(
           "No job requirements could be extracted."
         );

@@ -52,4 +52,4 @@ function analyzeRubric(candidateProfile,jobProfile,candidateSkills=[]) {
   const roadmap=createEvidenceRoadmap(gaps).map((item,i)=>({...item,guidanceVersion:VERSION,actions:[gaps[i].evidenceStatus==='partial'?'Verify existing experience and add a specific example if available.':'Check whether you already have relevant experience before starting new learning.',gaps[i].guidance]}));
   return {matches,gaps,readiness,roadmap,competencyEvidence:evaluated.map(r=>({competency:r.skill,status:r.evidenceStatus,evidence:r.evidenceDetails,rulesetVersion:VERSION})),assessmentVersion:VERSION};
 }
-module.exports={analyzeRubric,isRubricProfile,windows};
+module.exports={analyzeRubric,isRubricProfile,windows,evaluate};
