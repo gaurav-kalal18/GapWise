@@ -1,257 +1,120 @@
 const { skillTaxonomy } = require("./skill.taxonomy");
 const { getMatchScore } = require("./scoring.service");
 
-// Convert different skill formats into a canonical skill name
-const normalizeSkill = (skill) => {
-    if (typeof skill === "string") {
-        return skill;
-    }
-
-    if (skill && typeof skill === "object") {
-        return (
-            skill.canonicalName ||
-            skill.skill ||
-            skill.name ||
-            skill.matchedPhrase ||
-            null
-        );
-    }
-
-    return null;
+// Preserve the display name, but compare names without accidental
+// differences in casing or whitespace.
+const getSkillName = (skill) => {
+    const name = typeof skill === "string"
+        ? skill
+        : skill?.canonicalName || skill?.skill || skill?.name || skill?.matchedPhrase;
+    return typeof name === "string" ? name.trim().replace(/\s+/g, " ") : null;
 };
+
+const nameKey = (name) => name?.toLowerCase() || null;
 
 const getSkillId = (skill) => {
-    if (!skill || typeof skill !== "object") {
-        return null;
-    }
-
-    return (
-        skill.canonicalSkillId ||
-        skill.skillId ||
-        null
-    );
+    if (!skill || typeof skill !== "object") return null;
+    return skill.canonicalSkillId || skill.skillId || skill.id || null;
 };
 
-// Get the original candidate skill object
-const getCandidateSkillObject = (candidateSkills, skillName) => {
-    return candidateSkills.find(
-        (skill) => normalizeSkill(skill) === skillName
-    );
+const getRequirementType = (requirement) =>
+    typeof requirement === "string"
+        ? "required"
+        : requirement.requirementType || "required";
+
+// Strong relationships provide partial evidence only; they do not satisfy
+// a job requirement. Keep this distinct from broad related skills.
+const partialRelationships = {
+    sql: ["postgresql", "mysql"],
+    postgresql: ["sql"],
+    mysql: ["sql"]
 };
 
-const getCandidateSkillById = (candidateSkills, skillId) => {
-    if (!skillId) {
-        return null;
-    }
+const isPartialMatch = (candidateName, requirementName) =>
+    (partialRelationships[nameKey(requirementName)] || [])
+        .includes(nameKey(candidateName));
 
-    return candidateSkills.find(
-        (skill) => getSkillId(skill) === skillId
-    );
+const taxonomyIndex = new Map(
+    Object.entries(skillTaxonomy).map(([name, info]) => [nameKey(name), info])
+);
+
+const findRelatedCandidate = (candidates, requiredName) => {
+    const targetName = nameKey(requiredName);
+    const requiredEntry = taxonomyIndex.get(targetName);
+
+    return candidates.find(({ name }) => {
+        const candidateEntry = taxonomyIndex.get(nameKey(name));
+        return (
+            candidateEntry?.relatedSkills?.some(s => nameKey(s) === targetName) ||
+            requiredEntry?.relatedSkills?.some(s => nameKey(s) === nameKey(name))
+        );
+    }) || null;
 };
 
-// Get requirement type
-const getRequirementType = (requirement) => {
-    if (typeof requirement === "string") {
-        return "required";
-    }
-
-    return requirement.requirementType || "required";
-};
-
-/*
- * Some relationships are strong enough to provide
- * partial evidence for the required skill.
- *
- * Example:
- * PostgreSQL -> SQL
- *
- * But:
- * JavaScript -> React
- *
- * does NOT mean the candidate knows React.
- */
-const isPartialMatch = (candidateSkill, requiredSkill) => {
-
-    const partialRelationships = {
-        SQL: ["PostgreSQL", "MySQL"],
-        PostgreSQL: ["SQL"],
-        MySQL: ["SQL"]
-    };
-
-    return (
-        partialRelationships[requiredSkill]?.includes(candidateSkill) ||
-        false
-    );
-};
-
-// Find a related skill from the taxonomy
-const findRelatedSkill = (candidateSkills, requiredSkill) => {
-
-    const requiredInfo = skillTaxonomy[requiredSkill];
-
-    for (const candidateSkill of candidateSkills) {
-
-        const candidateInfo = skillTaxonomy[candidateSkill];
-
-        const candidateRelatedToRequired =
-            candidateInfo &&
-            Array.isArray(candidateInfo.relatedSkills) &&
-            candidateInfo.relatedSkills.includes(requiredSkill);
-
-        const requiredRelatedToCandidate =
-            requiredInfo &&
-            Array.isArray(requiredInfo.relatedSkills) &&
-            requiredInfo.relatedSkills.includes(candidateSkill);
-
-        if (
-            candidateRelatedToRequired ||
-            requiredRelatedToCandidate
-        ) {
-            return candidateSkill;
-        }
-    }
-
-    return null;
-};
-
-const matchSkills = (candidateSkills, requiredSkills) => {
-       
-    const normalizedCandidateSkills =
-        candidateSkills
-            .map(normalizeSkill)
-            .filter(Boolean);
-
-    const candidateSet = new Set(normalizedCandidateSkills);
+const matchSkills = (candidateSkills = [], requiredSkills = []) => {
+    const candidates = candidateSkills
+        .map(original => ({ original, name: getSkillName(original), id: getSkillId(original) }))
+        .filter(candidate => candidate.name);
 
     const matches = [];
     const gaps = [];
 
-    requiredSkills.forEach((requirement) => {
+    for (const requirement of requiredSkills) {
+        const skill = getSkillName(requirement);
+        if (!skill) continue;
+        const id = getSkillId(requirement);
+        const requirementType = getRequirementType(requirement);
 
-        const skill = normalizeSkill(requirement);
+        // Prefer true shared canonical IDs. Name matching is a fallback for
+        // legacy records and technology/ESCO namespaces that have not yet
+        // been unified. Different names are NOT inferred equivalent here.
+        const exact = candidates.find(candidate => id && candidate.id === id) ||
+            candidates.find(candidate => nameKey(candidate.name) === nameKey(skill));
 
-        if (!skill) {
-            return;
-        }
-
-        const requirementType =
-            getRequirementType(requirement);
-
-        // ------------------------------------------------
-        // 1. EXACT MATCH
-        // ------------------------------------------------
-
-        if (candidateSet.has(skill)) {
-
+        if (exact) {
             matches.push({
                 skill,
                 requirementType,
                 matchType: "exact",
-                matchedWith: skill,
+                matchedWith: exact.name,
                 matchScore: getMatchScore("exact"),
-                satisfiesRequirement: true
+                satisfiesRequirement: true,
+                candidateConfidence: exact.original?.confidence ?? null,
+                candidateEvidence: exact.original?.evidence ?? null
             });
-
-            return;
+            continue;
         }
 
-        // ------------------------------------------------
-        // 2. PARTIAL / STRONG RELATED MATCH
-        // ------------------------------------------------
-
-        const partialMatch =
-            normalizedCandidateSkills.find(
-                candidateSkill =>
-                    isPartialMatch(candidateSkill, skill)
-            );
-
-       if (partialMatch) {
-
-    const matchedCandidate =
-        getCandidateSkillObject(
-            candidateSkills,
-            partialMatch
-        );
-
-    const candidateConfidence =
-        matchedCandidate?.confidence ?? 0;
-
-    matches.push({
-        skill,
-        requirementType,
-        matchType: "related",
-        matchedWith: partialMatch,
-        matchScore: getMatchScore("related"),
-        satisfiesRequirement: false,
-        candidateConfidence,
-        candidateEvidence:
-            matchedCandidate?.evidence ?? null,
-        evidenceStrength: candidateConfidence
-    });
-
-    return;
-}
-        // ------------------------------------------------
-        // 3. GENERIC RELATED SKILL
-        // ------------------------------------------------
-
-        const relatedMatch =
-            findRelatedSkill(
-                normalizedCandidateSkills,
-                skill
-            );
-
-        /*
-         * Important:
-         *
-         * A generic related skill does NOT satisfy
-         * the requirement.
-         *
-         * Example:
-         * JavaScript -> React
-         *
-         * Candidate knowing JavaScript does not
-         * mean candidate knows React.
-         *
-         * Therefore we classify this as a GAP.
-         */
-
-        if (relatedMatch) {
-
-            gaps.push({
+        const partial = candidates.find(candidate => isPartialMatch(candidate.name, skill));
+        if (partial) {
+            const confidence = partial.original?.confidence ?? null;
+            matches.push({
                 skill,
                 requirementType,
-                matchType: "gap",
-                matchedWith: relatedMatch,
-                relatedSkill: true,
-                matchScore: getMatchScore("gap"),
-                satisfiesRequirement: false
+                matchType: "related",
+                matchedWith: partial.name,
+                matchScore: getMatchScore("related"),
+                satisfiesRequirement: false,
+                candidateConfidence: confidence,
+                candidateEvidence: partial.original?.evidence ?? null,
+                evidenceStrength: confidence
             });
-
-            return;
+            continue;
         }
 
-        // ------------------------------------------------
-        // 4. COMPLETE GAP
-        // ------------------------------------------------
-
+        const related = findRelatedCandidate(candidates, skill);
         gaps.push({
             skill,
             requirementType,
             matchType: "gap",
-            matchedWith: null,
-            relatedSkill: false,
+            matchedWith: related?.name ?? null,
+            relatedSkill: Boolean(related),
             matchScore: getMatchScore("gap"),
             satisfiesRequirement: false
         });
-    });
+    }
 
-    return {
-        matches,
-        gaps
-    };
+    return { matches, gaps };
 };
 
-module.exports = {
-    matchSkills
-};
+module.exports = { matchSkills };

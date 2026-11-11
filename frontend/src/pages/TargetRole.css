@@ -1,0 +1,243 @@
+
+.target-page {
+  min-height: 100vh;
+  background: var(--color-bg);
+}
+
+.target-navbar {
+  width: min(var(--max-width), calc(100% - 48px));
+  min-height: 76px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.target-content {
+  width: min(720px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 75px 0 100px;
+}
+
+.target-heading {
+  text-align: center;
+}
+
+.target-heading h1 {
+  font-family: "Manrope", sans-serif;
+  font-size: clamp(42px, 6vw, 64px);
+  font-weight: 800;
+  line-height: 1.06;
+  letter-spacing: -0.055em;
+  color: var(--color-text);
+}
+
+.target-heading h1 span {
+  color: var(--color-primary);
+}
+
+.target-heading p {
+  max-width: 540px;
+  margin: 22px auto 0;
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+}
+
+/* Selection cards */
+
+.target-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 48px;
+}
+
+.target-option {
+  min-height: 175px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 24px;
+  text-align: left;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.target-option:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.target-option.selected {
+  border: 2px solid var(--color-primary);
+  background: #fbfdfb;
+}
+
+.target-option-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  font-size: 23px;
+}
+
+.target-option strong {
+  color: var(--color-text);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.target-option > span:last-child {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* Input panel */
+
+.target-input-panel {
+  margin-top: 26px;
+  padding: 28px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.target-input-panel label {
+  display: block;
+  margin-bottom: 12px;
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.target-input-panel label span {
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+
+.target-input-panel select,
+.target-input-panel input,
+.target-input-panel textarea {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 14px 15px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.target-input-panel select:focus,
+.target-input-panel input:focus,
+.target-input-panel textarea:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+.target-input-panel textarea {
+  resize: vertical;
+  min-height: 150px;
+  line-height: 1.6;
+}
+
+.target-custom-fields {
+  display: flex;
+  flex-direction: column;
+}
+
+.target-custom-fields label:not(:first-child) {
+  margin-top: 22px;
+}
+
+.target-hint {
+  margin-top: 12px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.target-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-top: 28px;
+}
+
+.target-note {
+  margin-top: 24px;
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.target-option:focus-visible,
+.target-actions button:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 3px;
+}
+
+@media (max-width: 650px) {
+  .target-navbar {
+    width: calc(100% - 32px);
+  }
+
+  .target-navbar .upload-step {
+    display: none;
+  }
+
+  .target-content {
+    width: calc(100% - 32px);
+    padding-top: 60px;
+  }
+
+  .target-heading h1 {
+    font-size: 42px;
+  }
+
+  .target-heading p {
+    font-size: 16px;
+  }
+
+  .target-options {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .target-option {
+    min-height: 130px;
+    padding: 20px;
+  }
+
+  .target-input-panel {
+    padding: 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .target-option,
+  .target-input-panel input,
+  .target-input-panel select,
+  .target-input-panel textarea {
+    transition: none;
+  }
+}
