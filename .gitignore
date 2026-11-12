@@ -24,3 +24,9 @@ uploads/
 .DS_Store
 Thumbs.db
 .vscode/
+
+# Installer backups
+*.bak
+
+# Generated validation reports
+backend/validation/*-report.json

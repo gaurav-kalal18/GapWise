@@ -25,16 +25,15 @@ function UploadResume() {
 
     const allowedTypes = [
       "application/pdf",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     ];
 
-    if (!allowedTypes.includes(file.type)) {
-      setError("Please upload a PDF or DOCX resume.");
+    if (!allowedTypes.includes(file.type) || !file.name.toLowerCase().endsWith(".pdf")) {
+      setError("Please upload a PDF resume.");
       return;
     }
 
-    if (file.size > 10 * 1024 * 1024) {
-      setError("Resume must be smaller than 10 MB.");
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Resume must be 5 MB or smaller.");
       return;
     }
 
@@ -210,7 +209,7 @@ function UploadResume() {
           <input
             ref={fileInputRef}
             type="file"
-            accept=".pdf,.docx"
+            accept=".pdf"
             onChange={handleFileChange}
             hidden
           />
@@ -230,7 +229,7 @@ function UploadResume() {
               </p>
 
               <span className="upload-format">
-                PDF or DOCX · Maximum 10 MB
+                PDF only · Maximum 5 MB
               </span>
             </>
           ) : (
@@ -313,8 +312,9 @@ function UploadResume() {
         </div>
 
         <div className="privacy-note">
-          Your resume is used only to create your
-          GapWise candidate profile.
+          Your PDF is processed in memory to create your
+          candidate profile. The PDF is not stored by GapWise.
+          AI suggestions are an optional, synthetic-data-only prototype.
         </div>
 
       </section>
