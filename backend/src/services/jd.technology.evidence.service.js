@@ -10,7 +10,9 @@ const has=(s,names)=>names.length>0&&new RegExp(`(?:^|[^\\w+#])${token(names)}`,
 const stackNames=s=>String(s||'').replace(/^(?:tech(?:nology|nologies)?(?: stack)?|stack|tools|languages)\s*:\s*/i,'').split(/[•|,;]/).map(norm);
 const negative=/\b(?:not|never|without|planning|planned|intend|want to|learning|familiar with|assisted|observed|will|would|evaluated whether)\b/i;
 const build='(?:built|implemented|developed|created|designed|wrote|programmed|coded)';
-const object='(?:applications?|apps?|platforms?|services?|software|tools?|apis?|systems?|components?|features?|frameworks?|scripts?|modules?|algorithms?|programs?|functions?|code)';
+const object=
+'(?:applications?|apps?|platforms?|services?|software|tools?|apis?|systems?|components?|features?|frameworks?|scripts?|modules?|algorithms?|programs?|functions?|code)';
+
 const buildClaim=new RegExp(`\\b${build}\\s+(?:[\\w+.#-]+\\s+){0,7}${object}\\b`,'i');
 const backendClaim=new RegExp(`\\b${build}\\s+(?:(?:an?|the|our|my|new|scalable|secure|distributed|transactional|REST(?:ful)?|GraphQL|internal|public|web|[0-9]+)\\s+){0,6}(?:backend|server|server-side|microservices?|services?|apis?)\\b`,'i');
 const directUse=(text,names,verbs)=>new RegExp(`\\b${verbs}\\s+(?:(?:an?|the|our|my|managed|hosted|local|remote|cloud|new|existing|relational|distributed)\\s+){0,4}${token(names)}`,'i').test(text);
@@ -21,7 +23,16 @@ function qualify(t,option,text,stack,allStack){
  const named=has(text,names);
  const implementation=buildClaim.test(text);
  const uniqueCategory=taxonomy.filter(x=>x.category===category&&namesFor(x).some(n=>allStack.includes(norm(n)))).length===1;
- if(category==='programming-language')return (implementation&&(via(text,names)||(stack&&uniqueCategory)))||directUse(text,names,'(?:coded in|programmed in|wrote code in)');
+ if(category==='programming-language'){
+  // Named language-object claims are direct evidence even without a stack:
+  // e.g. 'Developed a Java application'. A stack-only language should not
+  // inherit implementation from a tool whose goal is to inspect other tech.
+  const namedImplementation=namedObject(text,names,build,'applications?|apps?|services?|software|tools?|scripts?|modules?|features?|programs?|code');
+  const observationalTool=/\b(?:tools?|frameworks?|systems?|dashboards?)\s+(?:to|for)\s+(?:monitor|track|inspect|review|scan|compare|test|benchmark|analy[sz]e)\b/i.test(text);
+  return namedImplementation||(implementation&&via(text,names))||
+    (implementation&&stack&&uniqueCategory&&!observationalTool)||
+    directUse(text,names,'(?:coded in|programmed in|wrote code in)');
+ }
  if(category==='runtime')return (implementation&&via(text,names))||directUse(text,names,'(?:configured|used|integrated)')||(stack&&uniqueCategory&&backendClaim.test(text));
  if(['framework','framework-library','orm'].includes(category))return (implementation&&via(text,names))||directUse(text,names,'(?:integrated|configured|used)')||namedObject(text,names,build,'components?|services?|controllers?|routes?|modules?|applications?|apps?|middleware|models?|schemas?');
  if(category==='database'){
@@ -29,6 +40,10 @@ function qualify(t,option,text,stack,allStack){
   if(option.id==='tech:sql')return named&&(/\b(?:wrote|executed|optimized|implemented|designed)\b.{0,45}\bSQL\s+(?:queries|statements|joins|procedures)\b/i.test(text)||directUse(text,names,'(?:queried|used)'));
   return directUse(text,names,'(?:provisioned|configured|queried|administered|migrated|used|integrated)')||namedObject(text,names,'(?:provisioned|configured|created|designed|implemented|optimized|migrated|queried|managed)','instances?|databases?|schemas?|tables?|collections?|queries|indexes|clusters?')||(/\b(?:wrote|executed|optimized|implemented|designed|created)\b.{0,70}\b(?:queries|schemas?|tables?|collections?|indexes)\b/i.test(text)&&via(text,names));
  }
+ if(category==='data-library')return (named&&/\b(?:cleaned|preprocessed|transformed|processed|imputed|aggregated|analyzed|analysed|engineered|loaded)\b.{0,90}\b(?:data|datasets?|dataframes?|features?|columns?|missing values?)\b/i.test(text))||(via(text,names)&&/\b(?:cleaned|preprocessed|transformed|processed|imputed|aggregated|analyzed|analysed|engineered|loaded)\b.{0,90}\b(?:data|datasets?|dataframes?|features?|columns?|missing values?)\b/i.test(text));
+ if(category==='ml-framework')return (named&&/\b(?:trained|fine-tuned|fitted|implemented|deployed|served)\b.{0,90}\b(?:models?|classifiers?|regressors?|neural networks?|transformers?|inference)\b/i.test(text))||(via(text,names)&&/\b(?:trained|fine-tuned|fitted|implemented|deployed|served)\b.{0,90}\b(?:models?|classifiers?|regressors?|neural networks?|transformers?|inference)\b/i.test(text));
+ if(category==='visualization-library')return (named||via(text,names))&&/\b(?:created|plotted|visualized|visualised|generated|built|designed)\b.{0,90}\b(?:charts?|plots?|visualizations?|visualisations?|dashboards?|graphs?)\b/i.test(text);
+ if(category==='testing-framework')return (named||via(text,names))&&/\b(?:wrote|implemented|created|ran|automated|executed|built|developed)\b.{0,90}\b(?:unit tests?|integration tests?|regression tests?|test suites?|tests?)\b/i.test(text);
  if(category==='api'){if(/\b(?:tested|testing|benchmark(?:ed|ing)?|simulat(?:ed|or|ion))\b/i.test(text))return false;return namedObject(text,names,'(?:built|developed|implemented|designed|integrated|consumed|created)','endpoints?|routes?|services?')||directUse(text,names,'(?:built|developed|implemented|designed|integrated|consumed|created)');}
  if(category==='devops')return directUse(text,names,'(?:configured|used|integrated)')||(/\b(?:containeri[sz]ed|orchestrated|deployed|configured)\b/i.test(text)&&via(text,names));
  if(category==='developer-tool'||category==='developer-platform')return directUse(text,names,'(?:used|configured|managed)')||namedObject(text,names,'(?:created|managed|merged|rebased|configured|used)','branches|repositories|commits|pull requests|workflows');
@@ -49,6 +64,6 @@ function assessTech(option,claims,skills){
  const evidence=(direct.length?direct:partial).sort((a,b)=>b.strength-a.strength).slice(0,3).map(({strength,...e})=>e);
  return {status:direct.length?'demonstrated':partial.length?'partial':'not_demonstrated',evidence};
 }
-const guidance={ 'programming-language':'Implement and test a feature in this language; describe the code and outcome.',runtime:'Build a service or executable using this runtime and document its execution.',framework:'Implement a feature with the framework and document the components or services used.','framework-library':'Implement a feature with the library and describe its integration.',orm:'Implement persistence with the ORM and test a query or transaction.',database:'Provision or use the specified database, implement queries or a schema, and document the result.',api:'Implement or integrate documented API requests and test success and error cases.',devops:'Configure or deploy a workload with the specified tool and document the configuration.', 'developer-tool':'Demonstrate a concrete workflow using the tool; document the commands or changes.', 'developer-platform':'Document a repository or delivery workflow using the platform.', 'cloud-platform':'Provision and deploy a workload using the specified platform.', 'deployment-platform':'Deploy a working application and document configuration and verification.'};
+const guidance={ 'programming-language':'Implement and test a feature in this language; describe the code and outcome.',runtime:'Build a service or executable using this runtime and document its execution.',framework:'Implement a feature with the framework and document the components or services used.','framework-library':'Implement a feature with the library and describe its integration.',orm:'Implement persistence with the ORM and test a query or transaction.',database:'Provision or use the specified database, implement queries or a schema, and document the result.',api:'Implement or integrate documented API requests and test success and error cases.',devops:'Configure or deploy a workload with the specified tool and document the configuration.', 'developer-tool':'Demonstrate a concrete workflow using the tool; document the commands or changes.', 'developer-platform':'Document a repository or delivery workflow using the platform.', 'cloud-platform':'Provision and deploy a workload using the specified platform.', 'data-library':'Clean or transform a dataset using this library and document the operations.', 'ml-framework':'Train or serve a model with this framework and document evaluation or inference.', 'visualization-library':'Create charts or plots with this library and explain the result.', 'testing-framework':'Write and run an automated test suite using this framework.', 'deployment-platform':'Deploy a working application and document configuration and verification.'};
 function technologyGuidance(option){return option.id==='tech:sql'?'Write and test SQL queries, including joins or aggregations, and explain their results.':guidance[option.category]||'Document a concrete task completed with the specified technology.';}
 module.exports={assessTech,technologyGuidance};

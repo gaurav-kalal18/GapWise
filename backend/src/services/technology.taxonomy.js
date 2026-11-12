@@ -307,6 +307,174 @@ const technologyTaxonomy = [
         aliases: [
             "render"
         ]
+    },
+
+    // Fix 08C: expanded framework, data, ML, visualization and testing coverage
+    {
+        "id": "tech:vue",
+        "canonicalName": "Vue",
+        "category": "framework-library",
+        "aliases": [
+            "vue",
+            "vue.js",
+            "vuejs"
+        ]
+    },
+    {
+        "id": "tech:angular",
+        "canonicalName": "Angular",
+        "category": "framework",
+        "aliases": [
+            "angular"
+        ]
+    },
+    {
+        "id": "tech:svelte",
+        "canonicalName": "Svelte",
+        "category": "framework-library",
+        "aliases": [
+            "svelte"
+        ]
+    },
+    {
+        "id": "tech:next-js",
+        "canonicalName": "Next.js",
+        "category": "framework",
+        "aliases": [
+            "next.js",
+            "nextjs"
+        ]
+    },
+    {
+        "id": "tech:spring-boot",
+        "canonicalName": "Spring Boot",
+        "category": "framework",
+        "aliases": [
+            "spring boot",
+            "springboot"
+        ]
+    },
+    {
+        "id": "tech:django",
+        "canonicalName": "Django",
+        "category": "framework",
+        "aliases": [
+            "django"
+        ]
+    },
+    {
+        "id": "tech:fastapi",
+        "canonicalName": "FastAPI",
+        "category": "framework",
+        "aliases": [
+            "fastapi",
+            "fast api"
+        ]
+    },
+    {
+        "id": "tech:flask",
+        "canonicalName": "Flask",
+        "category": "framework",
+        "aliases": [
+            "flask"
+        ]
+    },
+    {
+        "id": "tech:pandas",
+        "canonicalName": "Pandas",
+        "category": "data-library",
+        "aliases": [
+            "pandas"
+        ]
+    },
+    {
+        "id": "tech:numpy",
+        "canonicalName": "NumPy",
+        "category": "data-library",
+        "aliases": [
+            "numpy"
+        ]
+    },
+    {
+        "id": "tech:scikit-learn",
+        "canonicalName": "scikit-learn",
+        "category": "ml-framework",
+        "aliases": [
+            "scikit-learn",
+            "sklearn"
+        ]
+    },
+    {
+        "id": "tech:pytorch",
+        "canonicalName": "PyTorch",
+        "category": "ml-framework",
+        "aliases": [
+            "pytorch"
+        ]
+    },
+    {
+        "id": "tech:tensorflow",
+        "canonicalName": "TensorFlow",
+        "category": "ml-framework",
+        "aliases": [
+            "tensorflow"
+        ]
+    },
+    {
+        "id": "tech:matplotlib",
+        "canonicalName": "Matplotlib",
+        "category": "visualization-library",
+        "aliases": [
+            "matplotlib"
+        ]
+    },
+    {
+        "id": "tech:seaborn",
+        "canonicalName": "Seaborn",
+        "category": "visualization-library",
+        "aliases": [
+            "seaborn"
+        ]
+    },
+    {
+        "id": "tech:plotly",
+        "canonicalName": "Plotly",
+        "category": "visualization-library",
+        "aliases": [
+            "plotly"
+        ]
+    },
+    {
+        "id": "tech:jest",
+        "canonicalName": "Jest",
+        "category": "testing-framework",
+        "aliases": [
+            "jest"
+        ]
+    },
+    {
+        "id": "tech:pytest",
+        "canonicalName": "pytest",
+        "category": "testing-framework",
+        "aliases": [
+            "pytest"
+        ]
+    },
+    {
+        "id": "tech:cypress",
+        "canonicalName": "Cypress",
+        "category": "testing-framework",
+        "aliases": [
+            "cypress"
+        ]
+    },
+    {
+        "id": "tech:playwright",
+        "canonicalName": "Playwright",
+        "category": "testing-framework",
+        "aliases": [
+            "playwright"
+        ]
     }
 ];
 

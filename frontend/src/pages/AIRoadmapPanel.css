@@ -1,0 +1,24 @@
+.gw-ai-panel{margin-top:25px;padding:25px 27px;background:#fff;border:1px solid #dce8df;border-radius:15px;color:#172a22}
+.gw-ai-panel-title{display:flex;gap:12px;align-items:center}
+.gw-ai-sparkle{font-size:28px;color:#187c4c;line-height:1}
+.gw-ai-kicker{font-size:10px;color:#177a4a;font-weight:800;letter-spacing:.12em}
+.gw-ai-panel h3{font-size:20px;letter-spacing:-.025em;margin:2px 0 0;font-weight:800}
+.gw-ai-panel>p{font-size:13px;color:#53695b;line-height:1.6;margin:13px 0}
+.gw-ai-notice{padding:14px 16px;background:#fff8e8;border:1px solid #f2e4bf;border-radius:9px;color:#70582d;line-height:1.7;font-size:12px}
+.gw-ai-confirm{display:flex;align-items:flex-start;gap:11px;font-size:12px;line-height:1.6;margin:19px 0;color:#354e40;cursor:pointer}
+.gw-ai-confirm input{margin-top:3px;accent-color:#187c4c;flex:none;width:16px;height:16px}
+.gw-ai-button{display:inline-flex;gap:8px;align-items:center;background:#177a4a;border:1px solid #177a4a;border-radius:9px;color:#fff;font-size:12px;font-weight:700;padding:12px 17px;cursor:pointer}
+.gw-ai-button:disabled{cursor:not-allowed;opacity:.48}
+.gw-ai-button:focus-visible,.gw-ai-confirm input:focus-visible{outline:3px solid #75bda0;outline-offset:3px}
+.gw-ai-error{font-size:12px;color:#9d4f28;margin-top:14px}
+.gw-ai-results{margin-top:21px;border-top:1px solid #e2ebe4;padding-top:19px}
+.gw-ai-results h4{font-size:15px;margin:0 0 15px}
+.gw-ai-results article{padding:14px 0;border-top:1px solid #e9eeea}
+.gw-ai-results article strong{font-size:13px}
+.gw-ai-results ul{font-size:12px;color:#526557;line-height:1.8;padding-left:20px;margin:9px 0}
+.gw-ai-results article p{font-size:12px;color:#3d5747}
+@media(max-width:600px){.gw-ai-panel{padding:20px 16px}.gw-ai-button{width:100%;justify-content:center}}
+
+.gw-ai-project{margin:10px 0;padding:11px 13px;border:1px solid #dce8df;border-radius:9px;background:#f7faf7;font-size:12px;color:#284837;line-height:1.6}
+.gw-ai-project span{font-weight:650}.gw-ai-project p{margin:4px 0 0;color:#5d7164;overflow-wrap:anywhere}
+.gw-ai-project-generic{color:#617167;background:#fafbf9}

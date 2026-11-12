@@ -3,7 +3,7 @@ const taxonomy = require('./technology.taxonomy');
 const { C } = require('./role.rubric.service');
 const { windows } = require('./resume.context.service');
 const {assessTech,technologyGuidance}=require('./jd.technology.evidence.service');
-const VERSION = 'jd-evidence-v1.1';
+const VERSION = 'jd-evidence-v1.2';
 const norm = s => String(s ?? '').trim().toLowerCase().replace(/\s+/g,' ');
 const escape = s => s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
 const clean = s => s.trim().replace(/[.;]+$/,'').trim();
@@ -22,15 +22,17 @@ const entries = () => {
 };
 const negative = /\b(?:not required|no experience (?:is )?required|not necessary|no need|not needed|optional only)\b/i;
 const qualifier = /\b(?:\d+\+?\s*(?:years?|months?)|senior|expert|advanced|proficien(?:t|cy)|certifi(?:ed|cation)|degree|bachelor|master|phd|professional experience|commercial experience|production experience)\b/i;
+const ignoreSections=new Set(['about us','benefits','what we offer']);
 const headings = new Map(Object.entries({'required':'required','preferred':'preferred','requirements':'required','required qualifications':'required','minimum qualifications':'required','must have':'required','must-have':'required','required skills':'required','essential skills':'required','preferred qualifications':'preferred','preferred skills':'preferred','nice to have':'preferred','nice-to-have':'preferred','bonus skills':'preferred','desirable skills':'preferred','responsibilities':null,'about us':null,'about the role':null,'benefits':null,'what we offer':null,'job description':null}));
 function parse(description){
  const dictionary=entries(), found=new Map(), review=[]; let section=null;
  for(const raw of String(description||'').split(/\r?\n/)) {
   let line=raw.trim().replace(/^(?:[-*•▪]\s+|\d+[.)]\s+)/,''); if(!line) continue;
-  const head=norm(line.replace(/:$/,'')); if(headings.has(head)){section=headings.get(head);continue;}
+  const head=norm(line.replace(/:$/,'')); if(headings.has(head)){section=ignoreSections.has(head)?'ignore':headings.get(head);continue;}
   let type=section;
   const explicit=line.match(/^(required|must have|must-have|preferred|nice to have|nice-to-have|bonus|optional)\s*:\s*/i);
   if(explicit){type=/^(required|must)/i.test(explicit[1])?'required':'preferred';line=line.slice(explicit[0].length);}
+  if(section==='ignore'&&!explicit)continue;
   if(!type){review.push({excerpt:raw.trim(),reason:'requirement-importance-unclear'});continue;}
   if(negative.test(line)||qualifier.test(line)){review.push({excerpt:raw.trim(),requirementType:type,reason:negative.test(line)?'negated-requirement-needs-review':'qualified-requirement-needs-review'});continue;}
   // Only parse an entire simple list. Never silently strip an unknown qualifier or requirement.

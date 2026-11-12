@@ -23,5 +23,5 @@ const { analyzeResolvedCandidate }=loadAnalysis();
 const {buildJobProfile}=require('../src/services/job.service');
 test('custom JD profile dispatches into new evidence path',()=>{
  const result=analyzeResolvedCandidate([],buildJobProfile({description:'Required: Java'}),{projects:'Built an application using Java.'});
- assert.equal(result.assessmentVersion,'jd-evidence-v1.1');assert.equal(result.readiness.score,100);
+ assert.equal(result.assessmentVersion,'jd-evidence-v1.2');assert.equal(result.readiness.score,100);
 });
