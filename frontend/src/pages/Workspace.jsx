@@ -1,115 +1,165 @@
 
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
+
 import "./Workspace.css";
 
 export default function Workspace() {
-  const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { user, logout, status } = useAuth();
 
-  const [loggingOut, setLoggingOut] = useState(false);
-  const [error, setError] = useState("");
+  const firstName = user?.name?.trim()?.split(/\s+/)[0] || "there";
 
-  async function handleLogout() {
-    if (loggingOut) return;
-
-    setLoggingOut(true);
-    setError("");
-
+  const handleLogout = async () => {
     try {
       await logout();
       navigate("/", { replace: true });
-    } catch {
-      setError("Could not sign out. Please try again.");
-    } finally {
-      setLoggingOut(false);
+    } catch (error) {
+      console.error("Logout failed:", error);
     }
+  };
+
+  if (status === "loading") {
+    return (
+      <main className="workspace-page">
+        <div className="workspace-container">
+          <p>Loading your workspace...</p>
+        </div>
+      </main>
+    );
   }
 
   return (
-    <main className="gw-workspace">
-      <header className="gw-workspace-header">
-        <Link to="/" className="gw-workspace-brand">
-          <span aria-hidden="true">↗</span> GapWise
-        </Link>
+    <main className="workspace-page">
+      {/* NAVBAR */}
+      <nav className="workspace-navbar">
+        <button
+          type="button"
+          className="workspace-logo"
+          onClick={() => navigate("/")}
+        >
+          <span className="brand-mark">↗</span>
+          GapWise
+        </button>
 
-        <div className="gw-workspace-nav">
-          <span className="gw-workspace-account">
-            {user?.name}
+        <div className="workspace-nav-actions">
+          <span className="workspace-user">
+            {user?.name || "My Account"}
           </span>
+
           <button
             type="button"
+            className="workspace-logout"
             onClick={handleLogout}
-            disabled={loggingOut}
           >
-            {loggingOut ? "Signing out..." : "Log out"}
+            Log out ↗
           </button>
         </div>
-      </header>
+      </nav>
 
-      <section className="gw-workspace-main">
-        <span className="gw-workspace-eyebrow">
-          YOUR PERSONAL WORKSPACE
-        </span>
+      {/* MAIN CONTENT */}
+      <div className="workspace-container">
+        {/* WELCOME */}
+        <section className="workspace-header">
+          <div className="workspace-eyebrow">
+            YOUR PERSONAL WORKSPACE
+          </div>
 
-        <h1>
-          Welcome back,
-          <br />
-          <span>{user?.name || "there"}.</span>
-        </h1>
+          <h1>
+            Welcome back, <span>{firstName}.</span>
+          </h1>
 
-        <p className="gw-workspace-description">
-          Explore your skill gaps, analyze your resume,
-          and build a clearer path toward your target role.
-        </p>
-
-        {error && (
-          <p className="gw-workspace-error" role="alert">
-            {error}
+          <p>
+            Your space to analyze your skills, track
+            your progress, and build toward your
+            next opportunity.
           </p>
-        )}
+        </section>
 
-        <div className="gw-workspace-grid">
-          <Link to="/upload" className="gw-workspace-card primary">
-            <span className="gw-workspace-card-icon">↗</span>
+        {/* FEATURE CARDS */}
+        <section className="workspace-cards">
+          {/* NEW ANALYSIS */}
+          <article className="workspace-card">
+            <div className="workspace-card-icon">
+              ↗
+            </div>
+
             <h2>New Analysis</h2>
-            <p>
-              Upload your resume and evaluate your evidence
-              against a role or job description.
-            </p>
-            <strong>Start analysis →</strong>
-          </Link>
 
-          <div className="gw-workspace-card">
-            <span className="gw-workspace-card-icon">▤</span>
+            <p>
+              Upload a resume and compare your skills
+              against a career role or a specific job
+              description.
+            </p>
+
+            <button
+              type="button"
+              className="workspace-card-button"
+              onClick={() => navigate("/upload")}
+            >
+              Start analysis <span>→</span>
+            </button>
+          </article>
+
+          {/* MY REPORTS */}
+          <article className="workspace-card">
+            <div className="workspace-card-icon">
+              ▤
+            </div>
+
             <h2>My Reports</h2>
-            <p>
-              Your historical analysis reports will appear
-              here once report saving is enabled.
-            </p>
-            <span className="gw-workspace-soon">
-              Coming in the next phase
-            </span>
-          </div>
 
-          <div className="gw-workspace-card">
-            <span className="gw-workspace-card-icon">↗</span>
+            <p>
+              Access your saved analyses, revisit
+              previous assessments, and review your
+              skill gaps whenever you need them.
+            </p>
+
+            <button
+              type="button"
+              className="workspace-card-button"
+              onClick={() => navigate("/reports")}
+            >
+              View my reports <span>→</span>
+            </button>
+          </article>
+
+          {/* MY PROGRESS */}
+          <article className="workspace-card">
+            <div className="workspace-card-icon">
+              ◷
+            </div>
+
             <h2>My Progress</h2>
+
             <p>
-              Compare your earlier and latest assessments
-              to identify improvements.
+              Compare your resume versions and see
+              how your demonstrated skills and
+              evidence coverage improve over time.
             </p>
-            <span className="gw-workspace-soon">
+
+            <span className="workspace-coming-soon">
               Coming in the next phase
             </span>
-          </div>
-        </div>
+          </article>
+        </section>
 
-        <div className="gw-workspace-note">
-          <strong>Account:</strong> {user?.email}
-        </div>
-      </section>
+        {/* ACCOUNT DETAILS */}
+        <section className="workspace-account">
+          <div>
+            <h3>Your account</h3>
+            <p>
+              Your saved reports are linked to
+              your GapWise account.
+            </p>
+          </div>
+
+          <div className="workspace-account-info">
+            <span>{user?.name || "User"}</span>
+            <small>{user?.email || ""}</small>
+          </div>
+        </section>
+      </div>
     </main>
   );
 }

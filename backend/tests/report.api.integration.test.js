@@ -291,6 +291,159 @@ test(
         "PASS: Report and resume version linked."
       );
 
+
+// Test HTTP deletion using an additional synthetic report.
+// Preserve the original report for the database reopening test.
+const secondPayload = {
+  ...payload,
+  resumeLabel: "Synthetic Resume - Delete Test",
+};
+
+const secondSaveResponse = await fetch(url, {
+  method: "POST",
+  headers: {
+    ...baseHeaders,
+    Cookie: cookie,
+  },
+  body: JSON.stringify(secondPayload),
+});
+
+assert.equal(secondSaveResponse.status, 201);
+const secondSaved = await secondSaveResponse.json();
+
+const deleteUrl = `${url}/${secondSaved.reportId}`;
+
+// Guest must not be able to delete.
+const guestDelete = await fetch(deleteUrl, {
+  method: "DELETE",
+  headers: baseHeaders,
+});
+
+assert.equal(guestDelete.status, 401);
+
+// Missing mutation header must be rejected.
+const missingHeaderDelete = await fetch(deleteUrl, {
+  method: "DELETE",
+  headers: {
+    "Content-Type": "application/json",
+    Origin: "http://localhost:5173",
+    Cookie: cookie,
+  },
+});
+
+assert.equal(missingHeaderDelete.status, 403);
+
+// Untrusted origin must be rejected.
+const badOriginDelete = await fetch(deleteUrl, {
+  method: "DELETE",
+  headers: {
+    ...baseHeaders,
+    Origin: "https://untrusted.example",
+    Cookie: cookie,
+  },
+});
+
+assert.equal(badOriginDelete.status, 403);
+
+// Bob must not be able to delete Alice's report.
+const bobSession = await loginUser({
+  email: "bob-report@example.test",
+  password: "BobSecure#2026",
+});
+
+const bobDelete = await fetch(deleteUrl, {
+  method: "DELETE",
+  headers: {
+    ...baseHeaders,
+    Cookie: `gapwise_session=${bobSession.token}`,
+  },
+});
+
+assert.equal(bobDelete.status, 404);
+
+assert.ok(
+  getReportById(alice.id, secondSaved.reportId, db)
+);
+
+// Invalid report IDs must be rejected.
+const invalidDelete = await fetch(
+  `${url}/not-a-valid-uuid`,
+  {
+    method: "DELETE",
+    headers: {
+      ...baseHeaders,
+      Cookie: cookie,
+    },
+  }
+);
+
+assert.equal(invalidDelete.status, 400);
+
+// The owner can delete the synthetic report.
+const ownerDelete = await fetch(deleteUrl, {
+  method: "DELETE",
+  headers: {
+    ...baseHeaders,
+    Cookie: cookie,
+  },
+});
+
+assert.equal(ownerDelete.status, 204);
+
+// Both report and unused resume snapshot are gone.
+assert.equal(
+  getReportById(alice.id, secondSaved.reportId, db),
+  null
+);
+
+const deletedResume = db.prepare(`
+  SELECT id
+  FROM resume_versions
+  WHERE id = ?
+`).get(secondSaved.resumeVersionId);
+
+assert.equal(deletedResume, undefined);
+
+// A second deletion should return 404.
+const repeatedDelete = await fetch(deleteUrl, {
+  method: "DELETE",
+  headers: {
+    ...baseHeaders,
+    Cookie: cookie,
+  },
+});
+
+assert.equal(repeatedDelete.status, 404);
+
+// The original report remains available.
+assert.ok(
+  getReportById(alice.id, saved.reportId, db)
+);
+
+console.log(
+  "PASS: Guest deletion blocked."
+);
+
+console.log(
+  "PASS: Mutation and origin protections enforced."
+);
+
+console.log(
+  "PASS: Cross-account deletion blocked."
+);
+
+console.log(
+  "PASS: Invalid report ID rejected."
+);
+
+console.log(
+  "PASS: Owner deleted report and unused resume snapshot."
+);
+
+console.log(
+  "PASS: Original report preserved."
+);
+
       // 10. Stop server and reopen the database.
       await new Promise((resolve, reject) => {
         server.close((error) => {
