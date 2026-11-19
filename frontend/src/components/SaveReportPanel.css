@@ -1,0 +1,191 @@
+
+.gw-save-panel {
+  margin-top: 42px;
+  padding: 28px 30px;
+  border: 1px solid var(--gw-line, #e4ebe6);
+  border-radius: 15px;
+  background: #fff;
+}
+
+.gw-save-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 25px;
+}
+
+.gw-save-kicker {
+  color: #177a4a;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .13em;
+}
+
+.gw-save-heading h2 {
+  margin-top: 12px;
+  font-family: "Manrope", sans-serif;
+  font-size: 25px;
+  font-weight: 800;
+  letter-spacing: -.04em;
+  color: #172a22;
+}
+
+.gw-save-heading p {
+  margin-top: 9px;
+  max-width: 560px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: #6e8076;
+}
+
+.gw-save-symbol {
+  color: #177a4a;
+  font-size: 27px;
+}
+
+.gw-save-form {
+  margin-top: 26px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.gw-save-field {
+  width: min(100%, 440px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.gw-save-field label {
+  font-size: 12px;
+  font-weight: 750;
+  color: #172a22;
+}
+
+.gw-save-field input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #d7e3da;
+  border-radius: 9px;
+  background: #fff;
+  font-size: 13px;
+  color: #172a22;
+  outline: none;
+}
+
+.gw-save-field input:focus {
+  border-color: #177a4a;
+  box-shadow: 0 0 0 3px #e6f5e9;
+}
+
+.gw-save-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  max-width: 650px;
+  font-size: 12px;
+  color: #53675c;
+  line-height: 1.65;
+  cursor: pointer;
+}
+
+.gw-save-consent input {
+  margin-top: 4px;
+  accent-color: #177a4a;
+  flex-shrink: 0;
+}
+
+.gw-save-consent small {
+  display: block;
+  margin-top: 5px;
+  color: #829187;
+  line-height: 1.6;
+}
+
+.gw-save-button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  padding: 12px 20px;
+  background: #177a4a;
+  border: 1px solid #177a4a;
+  border-radius: 9px;
+  color: white;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.gw-save-button:hover:not(:disabled) {
+  background: #125f3e;
+}
+
+.gw-save-button:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.gw-save-success {
+  margin-top: 22px;
+  padding: 18px 20px;
+  background: #edf8ef;
+  border: 1px solid #cce7d2;
+  border-radius: 10px;
+  color: #245c39;
+}
+
+.gw-save-success strong {
+  font-size: 13px;
+}
+
+.gw-save-success p {
+  margin-top: 7px;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.gw-save-success small {
+  display: block;
+  margin-top: 12px;
+  font-size: 10px;
+  overflow-wrap: anywhere;
+}
+
+.gw-save-error {
+  margin-top: 15px;
+  padding: 12px 15px;
+  border-radius: 8px;
+  background: #fceeed;
+  color: #a43d3d;
+  font-size: 12px;
+}
+
+.gw-save-guest {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.gw-save-guest p,
+.gw-save-message {
+  font-size: 12px;
+  color: #6e8076;
+}
+
+@media (max-width: 600px) {
+  .gw-save-panel {
+    padding: 22px 18px;
+  }
+
+  .gw-save-heading h2 {
+    font-size: 22px;
+  }
+
+  .gw-save-button {
+    width: 100%;
+  }
+}

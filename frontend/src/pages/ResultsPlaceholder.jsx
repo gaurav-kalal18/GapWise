@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useGapWise } from "../context/useGapWise";
 import "./ResultsDashboard.css";
 import AIRoadmapPanel from "./AIRoadmapPanel";
-
+import SaveReportPanel from "../components/SaveReportPanel";
 const STATUS = {
   demonstrated: { label: "Demonstrated", symbol: "✓" },
   partial: { label: "Partial evidence", symbol: "◐" },
@@ -105,7 +105,12 @@ function RoadmapCard({ item, index }) {
 
 export default function ResultsPlaceholder() {
   const navigate = useNavigate();
-  const { analysis, jobProfile } = useGapWise();
+  const {
+  analysis,
+  jobProfile,
+  candidateProfile,
+  resume,
+} = useGapWise();
   const [filter, setFilter] = useState("all");
   const [group, setGroup] = useState("required");
   const [showFullRoadmap, setShowFullRoadmap] = useState(false);
@@ -215,7 +220,12 @@ export default function ResultsPlaceholder() {
         </section>
 
         <AIRoadmapPanel hasGaps={roadmap.length > 0} />
-
+              <SaveReportPanel
+  key={analysis}
+  candidateProfile={candidateProfile}
+  jobProfile={jobProfile}
+  resume={resume}
+/>
         <section className="gw-method-note"><span className="gw-method-mark">i</span><div><strong>How to read this report</strong><p>“Demonstrated” means the resume contains qualifying evidence under the current rules; it is not independent verification. Partial and missing evidence may reflect gaps in documentation rather than gaps in ability. Only fully demonstrated required requirements contribute to the primary coverage score.</p><small>Assessment ruleset: {analysis.assessmentVersion || readiness.evidenceRulesetVersion || "Not specified"} · {readiness.validationStatus || "Not externally validated"}</small></div></section>
 
         <div className="gw-results-footer"><button className="gw-button gw-button-secondary" onClick={() => navigate("/job")}>← Change target role</button><button className="gw-button gw-button-primary" onClick={() => navigate("/upload")}>Analyze another resume <span aria-hidden="true">↗</span></button></div>

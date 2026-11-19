@@ -8,7 +8,7 @@ const analysisRoutes = require("./routes/analysis.routes");
 const resumeRoutes = require("./routes/resume.routes");
 const roleRoutes = require("./routes/role.routes");
 const aiRoutes = require("./routes/ai.routes");
-
+const reportRoutes = require("./routes/report.routes");
 const app = express();
 
 
@@ -31,7 +31,7 @@ app.use("/api", resumeRoutes);
 app.use("/api", roleRoutes);
 app.use("/api", aiRoutes);
 app.use("/api", authRoutes);
-
+app.use("/api", reportRoutes);
 // Last: uniform, non-sensitive responses for malformed bodies and upload failures.
 app.use((err,req,res,next) => {
     if (res.headersSent) return next(err);
