@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-
+const authRoutes = require("./routes/auth.routes");
 const healthRoutes = require("./routes/health.routes");
 const profileRoutes = require("./routes/profile.routes");
 const jobRoutes = require("./routes/job.routes");
@@ -27,6 +27,7 @@ app.use("/api", analysisRoutes);
 app.use("/api", resumeRoutes);
 app.use("/api", roleRoutes);
 app.use("/api", aiRoutes);
+app.use("/api", authRoutes);
 
 // Last: uniform, non-sensitive responses for malformed bodies and upload failures.
 app.use((err,req,res,next) => {
