@@ -11,11 +11,14 @@ const aiRoutes = require("./routes/ai.routes");
 
 const app = express();
 
+
 app.use(
-    cors({
-        origin: "http://localhost:5173",
-    })
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
 );
+
 
 // Bound JSON input independently of individual route validation.
 app.use(express.json({limit:'128kb'}));

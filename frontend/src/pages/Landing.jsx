@@ -1,6 +1,8 @@
+
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-
+import { useState } from "react";
+import { useAuth } from "../context/useAuth";
 import "./Landing.css";
 
 function GapWiseLogo() {
@@ -21,14 +23,12 @@ function GapWiseLogo() {
           strokeWidth="2"
           strokeLinecap="round"
         />
-
         <path
           d="M15 7.5H20"
           stroke="currentColor"
           strokeWidth="2"
           strokeLinecap="round"
         />
-
         <path
           d="M9 7.5L12 11L15 7.5"
           stroke="currentColor"
@@ -36,21 +36,18 @@ function GapWiseLogo() {
           strokeLinecap="round"
           strokeLinejoin="round"
         />
-
         <path
           d="M4 16.5H9"
           stroke="currentColor"
           strokeWidth="2"
           strokeLinecap="round"
         />
-
         <path
           d="M15 16.5H20"
           stroke="currentColor"
           strokeWidth="2"
           strokeLinecap="round"
         />
-
         <path
           d="M9 16.5L12 13L15 16.5"
           stroke="currentColor"
@@ -68,12 +65,31 @@ function GapWiseLogo() {
 function Landing() {
   const navigate = useNavigate();
 
+  const { status, logout } = useAuth();
+
+  const [loggingOut, setLoggingOut] = useState(false);
+  const [logoutError, setLogoutError] = useState("");
+
+  async function handleLogout() {
+    if (loggingOut) return;
+
+    setLoggingOut(true);
+    setLogoutError("");
+
+    try {
+      await logout();
+      navigate("/", { replace: true });
+    } catch {
+      setLogoutError("Unable to log out. Please try again.");
+    } finally {
+      setLoggingOut(false);
+    }
+  }
+
   return (
     <main className="landing">
 
-      {/* =========================
-          NAVBAR
-      ========================= */}
+      {/* NAVBAR */}
 
       <nav className="navbar">
         <GapWiseLogo />
@@ -86,18 +102,66 @@ function Landing() {
             How it works
           </a>
 
-          <button
-            className="nav-button"
-            onClick={() => navigate("/upload")}
-          >
-            Get started
-          </button>
+          {status === "authenticated" ? (
+            <>
+              <button
+                type="button"
+                className="nav-button"
+                onClick={() => navigate("/workspace")}
+              >
+                My Workspace
+              </button>
+
+              <button
+                type="button"
+                className="nav-button"
+                onClick={handleLogout}
+                disabled={loggingOut}
+              >
+                {loggingOut ? "Signing out..." : "Log out"}
+              </button>
+            </>
+          ) : status === "guest" ? (
+            <>
+              <button
+                type="button"
+                className="nav-link gw-nav-signin"
+                onClick={() => navigate("/login")}
+              >
+                Sign in
+              </button>
+
+              <button
+                type="button"
+                className="nav-button"
+                onClick={() => navigate("/upload")}
+              >
+                Get started
+              </button>
+            </>
+          ) : (
+            <span
+              className="gw-nav-status"
+              role="status"
+            >
+              {status === "error"
+                ? "Account status unavailable"
+                : "Checking session..."}
+            </span>
+          )}
         </div>
       </nav>
 
-      {/* =========================
-          HERO
-      ========================= */}
+      {logoutError && (
+        <p
+          className="gw-landing-logout-error"
+          role="alert"
+        >
+          {logoutError}
+        </p>
+      )}
+
+      {/* HERO */}
 
       <section className="hero">
 
@@ -134,6 +198,7 @@ function Landing() {
           <div className="hero-actions">
 
             <button
+              type="button"
               className="primary-button"
               onClick={() => navigate("/upload")}
             >
@@ -154,9 +219,7 @@ function Landing() {
           </div>
         </motion.div>
 
-        {/* =========================
-            READINESS PREVIEW
-        ========================= */}
+        {/* READINESS PREVIEW */}
 
         <motion.div
           className="hero-visual"
@@ -273,9 +336,7 @@ function Landing() {
 
       </section>
 
-      {/* =========================
-          HOW GAPWISE WORKS
-      ========================= */}
+      {/* HOW GAPWISE WORKS */}
 
       <section
         id="how-it-works"
