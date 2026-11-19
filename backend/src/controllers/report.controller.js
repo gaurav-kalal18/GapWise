@@ -2,7 +2,10 @@
 "use strict";
 
 const { createHash } = require("node:crypto");
-
+const {
+  compareSavedReports,
+  ComparisonError,
+} = require("../services/report.comparison.service");
 const {
   validateCandidate,
 } = require("../middleware/request.validation");
@@ -346,9 +349,94 @@ function deleteMyReport(req, res) {
 }
 
 
+/**
+ * GET /api/reports/compare?first=UUID&second=UUID
+ *
+ * Compares two saved reports owned by the signed-in user.
+ * Does not recalculate or modify historical assessments.
+ */
+function compareMyReports(req, res) {
+  res.set("Cache-Control", "no-store");
+
+  try {
+    const { first, second } = req.query;
+
+    const uuidPattern =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+    // Reject invalid IDs, arrays, duplicate query values,
+    // and malformed parameters before database access.
+    if (
+      typeof first !== "string" ||
+      typeof second !== "string" ||
+      !uuidPattern.test(first) ||
+      !uuidPattern.test(second)
+    ) {
+      return res.status(400).json({
+        message: "Two valid report IDs are required.",
+      });
+    }
+
+    if (first === second) {
+      return res.status(400).json({
+        message: "Select two different reports.",
+      });
+    }
+
+    // Both lookups are scoped to the authenticated user.
+    // Never accept userId from the query string.
+    const firstReport = getReportById(
+      req.user.id,
+      first
+    );
+
+    const secondReport = getReportById(
+      req.user.id,
+      second
+    );
+
+    // Do not reveal whether another account owns an ID.
+    if (!firstReport || !secondReport) {
+      return res.status(404).json({
+        message: "One or both reports were not found.",
+      });
+    }
+
+    const comparison = compareSavedReports(
+      firstReport,
+      secondReport
+    );
+
+    return res.status(200).json({
+      message: "Historical comparison completed.",
+      comparison,
+    });
+
+  } catch (error) {
+    if (error instanceof ComparisonError) {
+      return res.status(422).json({
+        message: error.message,
+        code: error.code,
+        comparable: false,
+      });
+    }
+
+    console.error(
+      "Report comparison failed:",
+      error.name
+    );
+
+    return res.status(500).json({
+      message: "Unable to compare saved reports.",
+    });
+  }
+}
+
+
 module.exports = {
   createReport,
   listMyReports,
   getMyReport,
   deleteMyReport,
+  compareMyReports,
 };

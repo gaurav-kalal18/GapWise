@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import API from "../services/api";
+import ReportComparisonPanel from "../components/ReportComparisonPanel";
+
 import "./MyReports.css";
 
 const PAGE_SIZE = 10;
@@ -10,7 +12,6 @@ const PAGE_SIZE = 10;
 function formatDate(value) {
   if (!value) return "Date unavailable";
 
-  // SQLite CURRENT_TIMESTAMP uses UTC.
   const normalized =
     /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(value)
       ? `${value.replace(" ", "T")}Z`
@@ -33,13 +34,21 @@ function ReportCard({
   report,
   onView,
   onDelete,
+  onSelect,
+  selected,
   deleting,
+  deletionInProgress,
 }) {
   const isJD = report.targetType === "jd";
   const hasScore = Number.isFinite(report.score);
 
   return (
-    <article className="my-report-card">
+    <article
+      className={`my-report-card ${
+        selected ? "my-report-card-selected" : ""
+      }`}
+    >
+      {/* REPORT CATEGORY AND DATE */}
       <div className="my-report-card-top">
         <span className="my-report-type">
           {isJD ? "Custom JD" : "Career role"}
@@ -50,6 +59,25 @@ function ReportCard({
         </time>
       </div>
 
+      {/* COMPARISON SELECTION */}
+      <label className="my-report-select">
+        <input
+          type="checkbox"
+          checked={selected}
+          disabled={deletionInProgress}
+          onChange={(event) =>
+            onSelect(event.target.checked)
+          }
+        />
+
+        <span>
+          {selected
+            ? "Selected for comparison"
+            : "Select for comparison"}
+        </span>
+      </label>
+
+      {/* TARGET INFORMATION */}
       <h2>
         {report.targetName || "Untitled assessment"}
       </h2>
@@ -60,13 +88,16 @@ function ReportCard({
         </p>
       )}
 
+      {/* RESUME VERSION */}
       <div className="my-report-resume">
         <span aria-hidden="true">▤</span>
+
         <span>
           {report.resumeLabel || "Untitled resume"}
         </span>
       </div>
 
+      {/* COVERAGE INFORMATION */}
       <div className="my-report-card-bottom">
         <div>
           <strong>
@@ -93,7 +124,7 @@ function ReportCard({
           type="button"
           className="my-report-view-button"
           onClick={onView}
-          disabled={deleting}
+          disabled={deletionInProgress}
           aria-label={`View saved report for ${
             report.targetName || "this assessment"
           }`}
@@ -106,7 +137,7 @@ function ReportCard({
           type="button"
           className="my-report-delete-button"
           onClick={onDelete}
-          disabled={deleting}
+          disabled={deletionInProgress}
           aria-label={`Delete saved report for ${
             report.targetName || "this assessment"
           }`}
@@ -121,6 +152,7 @@ function ReportCard({
 export default function MyReports() {
   const navigate = useNavigate();
 
+  // REPORT HISTORY STATE
   const [page, setPage] = useState(1);
   const [reports, setReports] = useState([]);
 
@@ -135,9 +167,15 @@ export default function MyReports() {
   const [error, setError] = useState("");
   const [reloadKey, setReloadKey] = useState(0);
 
+  // DELETION STATE
   const [deletingId, setDeletingId] = useState(null);
   const [deleteError, setDeleteError] = useState("");
 
+  // COMPARISON STATE
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [selectionError, setSelectionError] = useState("");
+
+  // FETCH REPORT HISTORY
   useEffect(() => {
     const controller = new AbortController();
 
@@ -164,7 +202,14 @@ export default function MyReports() {
 
         setReports(response.data.reports);
 
-        setPagination(response.data.pagination);
+        setPagination(
+          response.data.pagination || {
+            page,
+            limit: PAGE_SIZE,
+            total: response.data.reports.length,
+            totalPages: 1,
+          }
+        );
 
         setStatus("success");
       } catch (err) {
@@ -187,18 +232,53 @@ export default function MyReports() {
     return () => controller.abort();
   }, [page, reloadKey]);
 
+  // SELECT OR DESELECT REPORT FOR COMPARISON
+  function handleSelect(reportId, checked) {
+    setSelectionError("");
+
+    if (!checked) {
+      setSelectedIds(current =>
+        current.filter(id => id !== reportId)
+      );
+      return;
+    }
+
+    if (selectedIds.includes(reportId)) {
+      return;
+    }
+
+    if (selectedIds.length >= 2) {
+      setSelectionError(
+        "You can compare only two reports at a time. " +
+        "Uncheck one before selecting another."
+      );
+      return;
+    }
+
+    setSelectedIds(current => [
+      ...current,
+      reportId,
+    ]);
+  }
+
+  // CLEAR COMPARISON SELECTION
+  function handleClearSelection() {
+    setSelectedIds([]);
+    setSelectionError("");
+  }
+
+  // PERMANENTLY DELETE SAVED REPORT
   async function handleDelete(report) {
-    // Prevent simultaneous deletions.
     if (deletingId !== null) return;
 
     const confirmed = window.confirm(
       `Permanently delete your saved report for "${
         report.targetName || "this assessment"
       }"?\n\n` +
-        `Resume: ${
-          report.resumeLabel || "Untitled resume"
-        }\n\n` +
-        "This action cannot be undone."
+      `Resume: ${
+        report.resumeLabel || "Untitled resume"
+      }\n\n` +
+      "This action cannot be undone."
     );
 
     if (!confirmed) return;
@@ -216,8 +296,14 @@ export default function MyReports() {
         }
       );
 
-      // Refresh only after the server confirms deletion.
-      // Go to the previous page if the last card was removed.
+      // Remove deleted report from comparison selection.
+      setSelectedIds(current =>
+        current.filter(id => id !== report.id)
+      );
+
+      setSelectionError("");
+
+      // Reload report history after successful deletion.
       if (reports.length === 1 && page > 1) {
         setPage(current => current - 1);
       } else {
@@ -274,8 +360,9 @@ export default function MyReports() {
             </h1>
 
             <p>
-              Revisit your saved assessments and keep
-              track of the roles you've analyzed.
+              Revisit your saved assessments, compare
+              resume versions, and track changes in
+              your documented evidence.
             </p>
           </div>
 
@@ -356,7 +443,7 @@ export default function MyReports() {
             </div>
           )}
 
-          {/* ERROR */}
+          {/* HISTORY ERROR */}
           {status === "error" && (
             <div
               className="my-reports-state"
@@ -410,6 +497,12 @@ export default function MyReports() {
                       <ReportCard
                         key={report.id}
                         report={report}
+                        selected={selectedIds.includes(
+                          report.id
+                        )}
+                        onSelect={checked =>
+                          handleSelect(report.id, checked)
+                        }
                         onView={() =>
                           navigate(
                             `/reports/${encodeURIComponent(
@@ -422,6 +515,9 @@ export default function MyReports() {
                         }
                         deleting={
                           deletingId === report.id
+                        }
+                        deletionInProgress={
+                          deletingId !== null
                         }
                       />
                     ))}
@@ -478,6 +574,28 @@ export default function MyReports() {
               </>
             )}
         </section>
+
+        {/* HISTORICAL COMPARISON */}
+        {status === "success" &&
+          pagination.total > 0 && (
+            <>
+              {selectionError && (
+                <p
+                  className="my-reports-selection-error"
+                  role="alert"
+                >
+                  {selectionError}
+                </p>
+              )}
+
+              <ReportComparisonPanel
+                key={selectedIds.join(":")}
+                firstId={selectedIds[0] || null}
+                secondId={selectedIds[1] || null}
+                onClear={handleClearSelection}
+              />
+            </>
+          )}
       </div>
     </main>
   );

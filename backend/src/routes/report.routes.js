@@ -17,11 +17,12 @@ const {
   listMyReports,
   getMyReport,
   deleteMyReport,
+  compareMyReports,
 } = require("../controllers/report.controller");
 
 const router = express.Router();
 
-// CREATE: Save a new analysis.
+// Save an authenticated analysis.
 router.post(
   "/reports",
   requireTrustedOrigin,
@@ -30,21 +31,29 @@ router.post(
   createReport
 );
 
-// READ: List reports owned by the logged-in user.
+// List reports owned by the signed-in user.
 router.get(
   "/reports",
   requireAuth,
   listMyReports
 );
 
-// READ: Retrieve one historical report.
+// IMPORTANT: Register this before /reports/:id.
+// Otherwise Express could interpret "compare" as an ID.
+router.get(
+  "/reports/compare",
+  requireAuth,
+  compareMyReports
+);
+
+// Retrieve a complete historical report.
 router.get(
   "/reports/:id",
   requireAuth,
   getMyReport
 );
 
-// DELETE: Permanently delete an owned report.
+// Permanently delete an owned report.
 router.delete(
   "/reports/:id",
   requireTrustedOrigin,
