@@ -38,7 +38,7 @@ export default function Workspace() {
           className="workspace-logo"
           onClick={() => navigate("/")}
         >
-          <span className="brand-mark">↗</span>
+          <span className="brand-mark">â†—</span>
           GapWise
         </button>
 
@@ -52,7 +52,7 @@ export default function Workspace() {
             className="workspace-logout"
             onClick={handleLogout}
           >
-            Log out ↗
+            Log out â†—
           </button>
         </div>
       </nav>
@@ -81,7 +81,7 @@ export default function Workspace() {
           {/* NEW ANALYSIS */}
           <article className="workspace-card">
             <div className="workspace-card-icon">
-              ↗
+              â†—
             </div>
 
             <h2>New Analysis</h2>
@@ -97,14 +97,14 @@ export default function Workspace() {
               className="workspace-card-button"
               onClick={() => navigate("/upload")}
             >
-              Start analysis <span>→</span>
+              Start analysis <span>â†’</span>
             </button>
           </article>
 
           {/* MY REPORTS */}
           <article className="workspace-card">
             <div className="workspace-card-icon">
-              ▤
+              â–¤
             </div>
 
             <h2>My Reports</h2>
@@ -120,7 +120,7 @@ export default function Workspace() {
               className="workspace-card-button"
               onClick={() => navigate("/reports")}
             >
-              View my reports <span>→</span>
+              View my reports <span>â†’</span>
             </button>
           </article>
 
@@ -128,7 +128,7 @@ export default function Workspace() {
 {/* MY PROGRESS */}
 <article className="workspace-card">
   <div className="workspace-card-icon">
-    ◷
+    â—·
   </div>
 
   <h2>My Progress</h2>
@@ -144,7 +144,7 @@ export default function Workspace() {
     className="workspace-card-button"
     onClick={() => navigate("/progress")}
   >
-    View my progress <span>→</span>
+    View my progress <span>â†’</span>
   </button>
 </article>
 
