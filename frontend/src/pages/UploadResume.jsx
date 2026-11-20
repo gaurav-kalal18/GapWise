@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+﻿import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 
@@ -18,7 +18,7 @@ function UploadResume() {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState("");
 
- 
+
 const handleFile = (file) => {
   setError("");
 
@@ -118,7 +118,7 @@ const handleFile = (file) => {
           onClick={() => navigate("/")}
         >
           <span className="brand-mark">
-            ↗
+            â†—
           </span>
 
           GapWise
@@ -168,7 +168,7 @@ const handleFile = (file) => {
           }}
         >
           <div className="eyebrow">
-            STEP 01 — YOUR PROFILE
+            STEP 01 â€” YOUR PROFILE
           </div>
 
           <h1>
@@ -228,7 +228,7 @@ const handleFile = (file) => {
           {!selectedFile ? (
             <>
               <div className="upload-icon">
-                ↑
+                â†‘
               </div>
 
               <h2>
@@ -240,7 +240,7 @@ const handleFile = (file) => {
               </p>
 
               <span className="upload-format">
-                PDF only · Maximum 5 MB
+                PDF only Â· Maximum 5 MB
               </span>
             </>
           ) : (
@@ -275,7 +275,7 @@ const handleFile = (file) => {
                   }
                 }}
               >
-                ×
+                Ã—
               </button>
 
             </div>
@@ -300,7 +300,7 @@ const handleFile = (file) => {
             onClick={() => navigate("/")}
             disabled={isUploading}
           >
-            ← Back
+            â† Back
           </button>
 
           <button
@@ -316,7 +316,7 @@ const handleFile = (file) => {
               : "Continue"}
 
             {!isUploading && (
-              <span>→</span>
+              <span>â†’</span>
             )}
           </button>
 

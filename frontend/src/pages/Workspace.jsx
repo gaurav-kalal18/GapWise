@@ -97,7 +97,7 @@ export default function Workspace() {
               className="workspace-card-button"
               onClick={() => navigate("/upload")}
             >
-              Start analysis <span>â†’</span>
+              Start analysis <span>→</span>
             </button>
           </article>
 
@@ -120,7 +120,7 @@ export default function Workspace() {
               className="workspace-card-button"
               onClick={() => navigate("/reports")}
             >
-              View my reports <span>â†’</span>
+              View my reports <span>→</span>
             </button>
           </article>
 
