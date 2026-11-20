@@ -104,6 +104,22 @@ async function registerUser(input) {
 
 const SESSION_DURATION_MS = 7 * 24 * 60 * 60 * 1000;
 
+
+/**
+ * Valid, precomputed scrypt hash for dummy verification.
+ *
+ * This is NOT a user password or authentication secret.
+ * It exists to make unknown-account login attempts perform
+ * the same expensive password-verification operation.
+ *
+ * Format must remain compatible with password.service.js.
+ */
+const DUMMY_PASSWORD_HASH =
+  "scrypt$16384$8$1$" +
+  "00112233445566778899aabbccddeeff$" +
+  "8ac7facf803545906e6af4a85115592c8e060b9bd741de66c09e2106e051ebc3ef" +
+  "8d5f6fda5cd82739b46f81ed0dcded8ed3b80a5b34d3dd7e577648f108ad27";
+
 function hashSessionToken(token) {
   return createHash("sha256")
     .update(token, "utf8")
@@ -147,9 +163,20 @@ async function loginUser(input) {
   `).get(normalizedEmail);
 
   // Do not reveal whether an email belongs to an account.
-  const validPassword = user
-    ? await verifyPassword(password, user.password_hash)
-    : false;
+  
+// Always perform a password verification, even when
+// the requested email does not belong to an account.
+//
+// This reduces timing differences that could otherwise
+// reveal whether an email is registered.
+const hashToVerify = user
+  ? user.password_hash
+  : DUMMY_PASSWORD_HASH;
+
+const validPassword = await verifyPassword(
+  password,
+  hashToVerify
+);
 
   if (!user || !validPassword) {
     throw Object.assign(

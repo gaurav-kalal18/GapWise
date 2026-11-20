@@ -38,7 +38,7 @@ export default function Workspace() {
           className="workspace-logo"
           onClick={() => navigate("/")}
         >
-          <span className="brand-mark">â†—</span>
+          <span className="brand-mark">↗</span>
           GapWise
         </button>
 
@@ -52,7 +52,7 @@ export default function Workspace() {
             className="workspace-logout"
             onClick={handleLogout}
           >
-            Log out â†—
+            Log out↗
           </button>
         </div>
       </nav>
@@ -81,7 +81,7 @@ export default function Workspace() {
           {/* NEW ANALYSIS */}
           <article className="workspace-card">
             <div className="workspace-card-icon">
-              â†—
+              ↗
             </div>
 
             <h2>New Analysis</h2>
@@ -104,7 +104,7 @@ export default function Workspace() {
           {/* MY REPORTS */}
           <article className="workspace-card">
             <div className="workspace-card-icon">
-              â–¤
+              ▤
             </div>
 
             <h2>My Reports</h2>
@@ -128,7 +128,7 @@ export default function Workspace() {
 {/* MY PROGRESS */}
 <article className="workspace-card">
   <div className="workspace-card-icon">
-    â—·
+   ◷
   </div>
 
   <h2>My Progress</h2>
@@ -144,7 +144,7 @@ export default function Workspace() {
     className="workspace-card-button"
     onClick={() => navigate("/progress")}
   >
-    View my progress <span>â†’</span>
+    View my progress <span>→</span>
   </button>
 </article>
 

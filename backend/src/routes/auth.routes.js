@@ -27,7 +27,11 @@ const router = express.Router();
 
 router.use(requireTrustedOrigin);
 
-router.post("/auth/register", registerRateLimit, async (req, res) => {
+router.post(
+  "/auth/register",
+  requireCookieMutation,
+  registerRateLimit,
+  async (req, res) => {
   try {
     const user = await registerUser(req.body);
 
@@ -51,7 +55,11 @@ router.post("/auth/register", registerRateLimit, async (req, res) => {
 });
 
 
-router.post("/auth/login", loginRateLimit, async (req, res) => {
+router.post(
+  "/auth/login",
+  requireCookieMutation,
+  loginRateLimit,
+  async (req, res) => {
   res.set("Cache-Control", "no-store");
 
   try {
