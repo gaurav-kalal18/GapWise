@@ -163,7 +163,6 @@ async function loginUser(input) {
   `).get(normalizedEmail);
 
   // Do not reveal whether an email belongs to an account.
-  
 // Always perform a password verification, even when
 // the requested email does not belong to an account.
 //
