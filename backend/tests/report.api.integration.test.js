@@ -351,6 +351,96 @@ const bobSession = await loginUser({
   password: "BobSecure#2026",
 });
 
+
+      // Task 9.4C: API-level account isolation.
+
+      const aliceHeaders = {
+        Cookie: `gapwise_session=${aliceSession.token}`,
+      };
+
+      const bobHeaders = {
+        Cookie: `gapwise_session=${bobSession.token}`,
+      };
+
+      // 1. A guest cannot list saved reports.
+      const guestList = await fetch(url);
+      assert.equal(guestList.status, 401);
+
+      // 2. Alice can list her own reports.
+      const aliceListResponse = await fetch(url, {
+        headers: aliceHeaders,
+      });
+
+      assert.equal(aliceListResponse.status, 200);
+
+      const aliceList = await aliceListResponse.json();
+
+      assert.ok(Array.isArray(aliceList.reports));
+      assert.ok(
+        aliceList.reports.some(
+          item => item.id === saved.reportId
+        )
+      );
+
+      // 3. Bob cannot see Alice's reports.
+      const bobListResponse = await fetch(url, {
+        headers: bobHeaders,
+      });
+
+      assert.equal(bobListResponse.status, 200);
+
+      const bobList = await bobListResponse.json();
+
+      assert.deepEqual(bobList.reports, []);
+      assert.equal(bobList.pagination.total, 0);
+
+      // 4. Alice can retrieve her full report.
+      const reportUrl = `${url}/${saved.reportId}`;
+
+      const aliceReportResponse = await fetch(
+        reportUrl,
+        { headers: aliceHeaders }
+      );
+
+      assert.equal(aliceReportResponse.status, 200);
+
+      const aliceReportBody =
+        await aliceReportResponse.json();
+
+      assert.equal(
+        aliceReportBody.report.id,
+        saved.reportId
+      );
+
+      // 5. Bob cannot retrieve Alice's report.
+      const bobReportResponse = await fetch(
+        reportUrl,
+        { headers: bobHeaders }
+      );
+
+      assert.equal(bobReportResponse.status, 404);
+
+      // 6. Guest cannot retrieve Alice's report.
+      const guestReportResponse = await fetch(
+        reportUrl
+      );
+
+      assert.equal(guestReportResponse.status, 401);
+
+      // 7. Wrong-account response should not reveal
+      // private report data.
+      const deniedBody = await bobReportResponse.json();
+
+      assert.equal(
+        Object.hasOwn(deniedBody, "report"),
+        false
+      );
+
+      console.log(
+        "PASS: Report list and retrieval enforce account isolation."
+      );
+
+
 const bobDelete = await fetch(deleteUrl, {
   method: "DELETE",
   headers: {
