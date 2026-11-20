@@ -18,27 +18,38 @@ function UploadResume() {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleFile = (file) => {
-    setError("");
+ 
+const handleFile = (file) => {
+  setError("");
 
-    if (!file) return;
+  // Clear the previous selection before validating
+  // a newly selected file.
+  setSelectedFile(null);
 
-    const allowedTypes = [
-      "application/pdf",
-    ];
+  if (!file) return;
 
-    if (!allowedTypes.includes(file.type) || !file.name.toLowerCase().endsWith(".pdf")) {
-      setError("Please upload a PDF resume.");
-      return;
-    }
+  const isPDF =
+    file.type === "application/pdf" &&
+    file.name.toLowerCase().endsWith(".pdf");
 
-    if (file.size > 5 * 1024 * 1024) {
-      setError("Resume must be 5 MB or smaller.");
-      return;
-    }
+  if (!isPDF) {
+    setError("Please upload a PDF resume.");
+    return;
+  }
 
-    setSelectedFile(file);
-  };
+  if (file.size > 5 * 1024 * 1024) {
+    setError("Resume must be 5 MB or smaller.");
+    return;
+  }
+
+  if (file.size === 0) {
+    setError("The selected PDF is empty.");
+    return;
+  }
+
+  setSelectedFile(file);
+};
+
 
   const handleFileChange = (event) => {
     const file = event.target.files?.[0];

@@ -205,11 +205,11 @@ export default function SaveReportPanel({
         <div className="gw-save-success" role="status">
           <strong>✓ Report saved successfully.</strong>
 
-          <p>
-            This analysis is stored in your account.
-            Your report history will become available
-            in the next feature.
-          </p>
+         <p>
+  Your analysis has been saved successfully.
+  You can reopen it anytime from My Reports
+  in your workspace.
+</p>
 
           <small>
             Report ID: {savedReportId}
