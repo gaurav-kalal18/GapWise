@@ -107,6 +107,11 @@ test(
         projects:
           "Built a Python API for a fictional college project.",
         experience: "",
+        password: "synthetic-secret-not-for-storage",
+sessionToken: "synthetic-token-not-for-storage",
+debugMetadata: {
+  privateNote: "must not be persisted",
+},
         education: "",
         contact: "private-synthetic@example.test",
       };
@@ -263,6 +268,86 @@ test(
         Object.hasOwn(report.candidateProfile, "contact"),
         false
       );
+
+
+      // Task 9.4D: Confirm candidate data minimization.
+      for (const field of [
+        "contact",
+        "password",
+        "sessionToken",
+        "debugMetadata",
+      ]) {
+        assert.equal(
+          Object.hasOwn(report.candidateProfile, field),
+          false,
+          `${field} must not be stored`
+        );
+      }
+
+      // Legitimate candidate evidence must survive.
+      assert.deepEqual(
+        report.candidateProfile.skills,
+        candidateProfile.skills
+      );
+
+      assert.equal(
+        report.candidateProfile.projects,
+        candidateProfile.projects
+      );
+
+      assert.equal(
+        report.candidateProfile.experience,
+        candidateProfile.experience
+      );
+
+      assert.equal(
+        report.candidateProfile.education,
+        candidateProfile.education
+      );
+
+      // Check the actual serialized SQLite snapshot,
+      // not just the repository's returned object.
+      const storedSnapshotRow = db.prepare(`
+        SELECT candidate_snapshot_json
+        FROM resume_versions
+        WHERE id = ?
+          AND user_id = ?
+      `).get(saved.resumeVersionId, alice.id);
+
+      assert.ok(storedSnapshotRow);
+
+      const storedSnapshot = JSON.parse(
+        storedSnapshotRow.candidate_snapshot_json
+      );
+
+      assert.deepEqual(
+        storedSnapshot,
+        report.candidateProfile
+      );
+
+      // The analysis should remain the server-generated
+      // result for the original submitted candidate.
+      assert.deepEqual(
+        report.analysis,
+        JSON.parse(JSON.stringify(expectedAnalysis))
+      );
+
+      console.log(
+        "PASS: Unknown candidate fields excluded."
+      );
+
+      console.log(
+        "PASS: Supported resume evidence retained."
+      );
+
+      console.log(
+        "PASS: SQLite snapshot matches sanitized report."
+      );
+
+      console.log(
+        "PASS: Stored analysis remains unchanged."
+      );
+
 
       console.log(
         "PASS: Dedicated contact field excluded."
