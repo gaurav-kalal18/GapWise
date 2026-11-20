@@ -2,13 +2,19 @@
 "use strict";
 
 const { createHash } = require("node:crypto");
+
 const {
   compareSavedReports,
   ComparisonError,
 } = require("../services/report.comparison.service");
+
 const {
   validateCandidate,
 } = require("../middleware/request.validation");
+
+const {
+  sanitizeCandidateForStorage,
+} = require("../services/candidate.storage.service");
 
 const {
   analyzeCandidateAgainstJob,
@@ -54,8 +60,8 @@ function getTargetDetails(jobProfile) {
       );
     }
 
-    // A stable identifier helps compare later analyses
-    // against the same job description.
+    // Generate a stable identifier so saved analyses
+    // can be compared against the same job description.
     const fingerprint = createHash("sha256")
       .update(
         JSON.stringify({
@@ -77,6 +83,12 @@ function getTargetDetails(jobProfile) {
   );
 }
 
+/**
+ * POST /api/reports
+ *
+ * Calculate and save an analysis for the
+ * currently authenticated user.
+ */
 function createReport(req, res) {
   res.set("Cache-Control", "no-store");
 
@@ -91,6 +103,7 @@ function createReport(req, res) {
       throw badRequest("Invalid report request.");
     }
 
+    // Saving requires explicit user consent.
     if (body.saveConsent !== true) {
       throw badRequest(
         "Confirm that you want to save this analysis."
@@ -111,8 +124,7 @@ function createReport(req, res) {
       throw badRequest("Invalid resume label.");
     }
 
-    // Reuse the validation from the current
-    // candidate-analysis endpoint.
+    // Validate using the existing analysis rules.
     validateCandidate({
       candidateProfile,
       jobProfile,
@@ -121,23 +133,24 @@ function createReport(req, res) {
     const { targetType, targetKey } =
       getTargetDetails(jobProfile);
 
-    // Never accept analysis, score, matches, gaps,
-    // roadmap or userId supplied by the browser.
+    // Always calculate analysis on the backend.
+    // Never trust browser-supplied scores, gaps,
+    // matches, roadmaps, or user IDs.
     const analysis = analyzeCandidateAgainstJob(
       candidateProfile,
       jobProfile
     );
 
-    // Do not persist the dedicated contact field.
-    // Other extracted resume sections may still
-    // contain personal information.
-    const {
-      contact: _excludedContact,
-      ...storedCandidateProfile
-    } = candidateProfile;
+    // Minimize stored candidate information.
+    // Excludes contact and unrecognized fields,
+    // while preserving supported resume evidence.
+    //
+    // Free-text evidence may still contain PII.
+    const storedCandidateProfile =
+      sanitizeCandidateForStorage(candidateProfile);
 
-    void _excludedContact;
-
+    // User identity comes from the server-side
+    // authenticated session, never the request body.
     const saved = saveAnalysisReport({
       userId: req.user.id,
       resumeLabel: resumeLabel.trim(),
@@ -158,7 +171,6 @@ function createReport(req, res) {
       reportId: saved.reportId,
       resumeVersionId: saved.resumeVersionId,
     });
-
   } catch (error) {
     if (
       error.status === 400 ||
@@ -190,7 +202,12 @@ function createReport(req, res) {
   }
 }
 
-
+/**
+ * GET /api/reports
+ *
+ * Return paginated saved-report summaries
+ * for the currently authenticated user.
+ */
 function listMyReports(req, res) {
   res.set("Cache-Control", "no-store");
 
@@ -198,8 +215,7 @@ function listMyReports(req, res) {
     const pageText = req.query.page ?? "1";
     const limitText = req.query.limit ?? "20";
 
-    // Strict parsing: reject values such as "2abc", decimals,
-    // negative numbers and unexpectedly large parameters.
+    // Strict numeric pagination validation.
     if (
       typeof pageText !== "string" ||
       typeof limitText !== "string" ||
@@ -248,17 +264,24 @@ function listMyReports(req, res) {
   }
 }
 
+/**
+ * GET /api/reports/:id
+ *
+ * Retrieve a saved report only when it belongs
+ * to the authenticated user.
+ */
 function getMyReport(req, res) {
   res.set("Cache-Control", "no-store");
 
   try {
     const reportId = req.params.id;
 
-    // Our report IDs are generated UUIDs.
+    const uuidPattern =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
     if (
       typeof reportId !== "string" ||
-      !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-        .test(reportId)
+      !uuidPattern.test(reportId)
     ) {
       return res.status(400).json({
         message: "Invalid report ID.",
@@ -271,8 +294,7 @@ function getMyReport(req, res) {
     );
 
     if (!report) {
-      // Deliberately use the same response for an unknown
-      // report and another user's report.
+      // Same response for unknown or other-user IDs.
       return res.status(404).json({
         message: "Report not found.",
       });
@@ -293,12 +315,11 @@ function getMyReport(req, res) {
   }
 }
 
-
 /**
  * DELETE /api/reports/:id
  *
- * Permanently deletes a report belonging to
- * the authenticated user.
+ * Permanently delete an authenticated user's
+ * saved report.
  */
 function deleteMyReport(req, res) {
   res.set("Cache-Control", "no-store");
@@ -306,7 +327,6 @@ function deleteMyReport(req, res) {
   try {
     const reportId = req.params.id;
 
-    // Validate the UUID before accessing the database.
     const uuidPattern =
       /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -319,23 +339,19 @@ function deleteMyReport(req, res) {
       });
     }
 
-    // User identity is taken ONLY from the
-    // authenticated server-side session.
+    // Identity always comes from the session.
     const deleted = deleteReportById(
       req.user.id,
       reportId
     );
 
     if (!deleted) {
-      // Same response for unknown and other-user reports.
       return res.status(404).json({
         message: "Report not found.",
       });
     }
 
-    // Successful permanent deletion.
     return res.status(204).end();
-
   } catch (error) {
     console.error(
       "Report deletion failed:",
@@ -348,12 +364,13 @@ function deleteMyReport(req, res) {
   }
 }
 
-
 /**
  * GET /api/reports/compare?first=UUID&second=UUID
  *
- * Compares two saved reports owned by the signed-in user.
- * Does not recalculate or modify historical assessments.
+ * Compare two historical reports owned
+ * by the authenticated user.
+ *
+ * Does not recalculate or modify saved analyses.
  */
 function compareMyReports(req, res) {
   res.set("Cache-Control", "no-store");
@@ -364,8 +381,6 @@ function compareMyReports(req, res) {
     const uuidPattern =
       /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-    // Reject invalid IDs, arrays, duplicate query values,
-    // and malformed parameters before database access.
     if (
       typeof first !== "string" ||
       typeof second !== "string" ||
@@ -383,8 +398,7 @@ function compareMyReports(req, res) {
       });
     }
 
-    // Both lookups are scoped to the authenticated user.
-    // Never accept userId from the query string.
+    // Both reports must belong to the signed-in user.
     const firstReport = getReportById(
       req.user.id,
       first
@@ -395,7 +409,6 @@ function compareMyReports(req, res) {
       second
     );
 
-    // Do not reveal whether another account owns an ID.
     if (!firstReport || !secondReport) {
       return res.status(404).json({
         message: "One or both reports were not found.",
@@ -411,7 +424,6 @@ function compareMyReports(req, res) {
       message: "Historical comparison completed.",
       comparison,
     });
-
   } catch (error) {
     if (error instanceof ComparisonError) {
       return res.status(422).json({
@@ -431,7 +443,6 @@ function compareMyReports(req, res) {
     });
   }
 }
-
 
 module.exports = {
   createReport,
