@@ -124,24 +124,30 @@ export default function Workspace() {
             </button>
           </article>
 
-          {/* MY PROGRESS */}
-          <article className="workspace-card">
-            <div className="workspace-card-icon">
-              ◷
-            </div>
+          
+{/* MY PROGRESS */}
+<article className="workspace-card">
+  <div className="workspace-card-icon">
+    ◷
+  </div>
 
-            <h2>My Progress</h2>
+  <h2>My Progress</h2>
 
-            <p>
-              Compare your resume versions and see
-              how your demonstrated skills and
-              evidence coverage improve over time.
-            </p>
+  <p>
+    Track your resume evidence coverage across
+    saved assessments and see how it changes
+    over time.
+  </p>
 
-            <span className="workspace-coming-soon">
-              Coming in the next phase
-            </span>
-          </article>
+  <button
+    type="button"
+    className="workspace-card-button"
+    onClick={() => navigate("/progress")}
+  >
+    View my progress <span>→</span>
+  </button>
+</article>
+
         </section>
 
         {/* ACCOUNT DETAILS */}

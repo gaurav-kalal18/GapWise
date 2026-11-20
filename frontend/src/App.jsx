@@ -13,6 +13,7 @@ import TargetRole from "./pages/TargetRole";
 import ResultsPlaceholder from "./pages/ResultsPlaceholder";
 import AuthPage from "./pages/AuthPage";
 import SavedReportView from "./pages/SavedReportView";
+import MyProgress from "./pages/MyProgress";
 function App() {
   return (
     <BrowserRouter>
@@ -23,6 +24,15 @@ function App() {
           path="/login"
           element={<AuthPage mode="login" />}
         />
+
+   <Route
+  path="/progress"
+  element={
+    <ProtectedRoute>
+      <MyProgress />
+    </ProtectedRoute>
+  }
+/>
 
         <Route
           path="/signup"

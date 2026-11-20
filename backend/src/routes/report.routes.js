@@ -2,7 +2,9 @@
 "use strict";
 
 const express = require("express");
-
+const {
+  getMyProgress,
+} = require("../controllers/progress.controller");
 const {
   requireAuth,
 } = require("../middleware/requireAuth");
@@ -44,6 +46,13 @@ router.get(
   "/reports/compare",
   requireAuth,
   compareMyReports
+);
+
+// Authenticated historical progress dashboard data.
+router.get(
+  "/progress",
+  requireAuth,
+  getMyProgress
 );
 
 // Retrieve a complete historical report.
