@@ -10,6 +10,10 @@ const migrations = [
     version: 1,
     file: "001_initial_schema.sql",
   },
+  {
+    version: 2,
+    file: "002_enforce_report_resume_ownership.sql",
+  },
 ];
 
 const REQUIRED_TABLES = [
