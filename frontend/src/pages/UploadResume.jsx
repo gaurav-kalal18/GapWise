@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+﻿import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 
@@ -18,27 +18,38 @@ function UploadResume() {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleFile = (file) => {
-    setError("");
 
-    if (!file) return;
+const handleFile = (file) => {
+  setError("");
 
-    const allowedTypes = [
-      "application/pdf",
-    ];
+  // Clear the previous selection before validating
+  // a newly selected file.
+  setSelectedFile(null);
 
-    if (!allowedTypes.includes(file.type) || !file.name.toLowerCase().endsWith(".pdf")) {
-      setError("Please upload a PDF resume.");
-      return;
-    }
+  if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-      setError("Resume must be 5 MB or smaller.");
-      return;
-    }
+  const isPDF =
+    file.type === "application/pdf" &&
+    file.name.toLowerCase().endsWith(".pdf");
 
-    setSelectedFile(file);
-  };
+  if (!isPDF) {
+    setError("Please upload a PDF resume.");
+    return;
+  }
+
+  if (file.size > 5 * 1024 * 1024) {
+    setError("Resume must be 5 MB or smaller.");
+    return;
+  }
+
+  if (file.size === 0) {
+    setError("The selected PDF is empty.");
+    return;
+  }
+
+  setSelectedFile(file);
+};
+
 
   const handleFileChange = (event) => {
     const file = event.target.files?.[0];
@@ -107,7 +118,7 @@ function UploadResume() {
           onClick={() => navigate("/")}
         >
           <span className="brand-mark">
-            ↗
+            â†—
           </span>
 
           GapWise
@@ -157,7 +168,7 @@ function UploadResume() {
           }}
         >
           <div className="eyebrow">
-            STEP 01 — YOUR PROFILE
+            STEP 01 â€” YOUR PROFILE
           </div>
 
           <h1>
@@ -217,7 +228,7 @@ function UploadResume() {
           {!selectedFile ? (
             <>
               <div className="upload-icon">
-                ↑
+                â†‘
               </div>
 
               <h2>
@@ -229,7 +240,7 @@ function UploadResume() {
               </p>
 
               <span className="upload-format">
-                PDF only · Maximum 5 MB
+                PDF only Â· Maximum 5 MB
               </span>
             </>
           ) : (
@@ -264,7 +275,7 @@ function UploadResume() {
                   }
                 }}
               >
-                ×
+                Ã—
               </button>
 
             </div>
@@ -289,7 +300,7 @@ function UploadResume() {
             onClick={() => navigate("/")}
             disabled={isUploading}
           >
-            ← Back
+            â† Back
           </button>
 
           <button
@@ -305,7 +316,7 @@ function UploadResume() {
               : "Continue"}
 
             {!isUploading && (
-              <span>→</span>
+              <span>â†’</span>
             )}
           </button>
 

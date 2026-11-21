@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useGapWise } from "../context/useGapWise";
 import "./ResultsDashboard.css";
 import AIRoadmapPanel from "./AIRoadmapPanel";
+import SaveReportPanel from "../components/SaveReportPanel";
 
 const STATUS = {
   demonstrated: { label: "Demonstrated", symbol: "✓" },
@@ -103,9 +104,34 @@ function RoadmapCard({ item, index }) {
   );
 }
 
-export default function ResultsPlaceholder() {
+export default function ResultsPlaceholder({
+  savedReport = null,
+}) {
   const navigate = useNavigate();
-  const { analysis, jobProfile } = useGapWise();
+ const {
+  analysis: activeAnalysis,
+  jobProfile: activeJobProfile,
+  candidateProfile: activeCandidateProfile,
+  resume: activeResume,
+} = useGapWise();
+
+// Historical reports use saved snapshots.
+// Live reports continue using the existing context.
+const analysis = savedReport
+  ? savedReport.analysis
+  : activeAnalysis;
+
+const jobProfile = savedReport
+  ? savedReport.targetProfile
+  : activeJobProfile;
+
+const candidateProfile = savedReport
+  ? savedReport.candidateProfile
+  : activeCandidateProfile;
+
+const resume = savedReport
+  ? { fileName: savedReport.resumeLabel }
+  : activeResume;
   const [filter, setFilter] = useState("all");
   const [group, setGroup] = useState("required");
   const [showFullRoadmap, setShowFullRoadmap] = useState(false);
@@ -153,7 +179,22 @@ export default function ResultsPlaceholder() {
     <main className="gw-results">
       <header className="gw-results-header">
         <button className="gw-wordmark" onClick={() => navigate("/")} aria-label="GapWise home"><span className="gw-wordmark-icon">↗</span> GapWise</button>
-        <div className="gw-header-right"><span className="gw-header-step">03 / 03 &nbsp; ANALYSIS</span><button className="gw-header-link" onClick={() => navigate("/job")}>Change target <span aria-hidden="true">↗</span></button></div>
+<div className="gw-header-right">
+  <span className="gw-header-step">
+    {savedReport
+      ? "SAVED ANALYSIS"
+      : "03 / 03   ANALYSIS"}
+  </span>
+
+  <button
+    className="gw-header-link"
+    onClick={() =>
+      navigate(savedReport ? "/reports" : "/job")
+    }
+  >
+    {savedReport ? "← My Reports" : "Change target ↗"}
+  </button>
+</div>
       </header>
 
       <div className="gw-results-main">
@@ -161,6 +202,30 @@ export default function ResultsPlaceholder() {
           <div><div className="gw-kicker"><span className="gw-kicker-dot" /> YOUR EVIDENCE REPORT IS READY</div><h1>Your skills, <span>in perspective.</span></h1><p>See where your resume provides evidence, what remains unclear, and where to focus next.</p></div>
           <div className="gw-target-tag"><span>ASSESSING FOR</span><strong>{roleName}</strong><small>{assessmentType}{jobProfile?.company ? ` · ${jobProfile.company}` : ""}</small></div>
         </section>
+
+        {savedReport && (
+  <section
+    className="gw-historical-banner"
+    aria-label="Saved report information"
+  >
+    <div>
+      <strong>Viewing a saved assessment</strong>
+      <p>
+        This report reflects the evidence and assessment
+        rules used when it was originally saved.
+        It has not been recalculated.
+      </p>
+
+      <small>
+        Resume: {savedReport.resumeLabel || "Untitled resume"}
+      </small>
+    </div>
+
+    <span className="gw-historical-label">
+      Historical snapshot
+    </span>
+  </section>
+)}
 
         {incomplete && (
           <section className="gw-review-banner" role="status">
@@ -214,11 +279,55 @@ export default function ResultsPlaceholder() {
           </> : <div className="gw-empty-list">No improvement actions were generated for the assessed requirements.</div>}
         </section>
 
-        <AIRoadmapPanel hasGaps={roadmap.length > 0} />
+    {!savedReport && (
+  <>
+    <AIRoadmapPanel hasGaps={roadmap.length > 0} />
 
+    <SaveReportPanel
+      key={analysis}
+      candidateProfile={candidateProfile}
+      jobProfile={jobProfile}
+      resume={resume}
+    />
+  </>
+)}
         <section className="gw-method-note"><span className="gw-method-mark">i</span><div><strong>How to read this report</strong><p>“Demonstrated” means the resume contains qualifying evidence under the current rules; it is not independent verification. Partial and missing evidence may reflect gaps in documentation rather than gaps in ability. Only fully demonstrated required requirements contribute to the primary coverage score.</p><small>Assessment ruleset: {analysis.assessmentVersion || readiness.evidenceRulesetVersion || "Not specified"} · {readiness.validationStatus || "Not externally validated"}</small></div></section>
 
-        <div className="gw-results-footer"><button className="gw-button gw-button-secondary" onClick={() => navigate("/job")}>← Change target role</button><button className="gw-button gw-button-primary" onClick={() => navigate("/upload")}>Analyze another resume <span aria-hidden="true">↗</span></button></div>
+<div className="gw-results-footer">
+  {savedReport ? (
+    <>
+      <button
+        className="gw-button gw-button-secondary"
+        onClick={() => navigate("/reports")}
+      >
+        ← Back to My Reports
+      </button>
+
+      <button
+        className="gw-button gw-button-primary"
+        onClick={() => navigate("/upload")}
+      >
+        Start new analysis ↗
+      </button>
+    </>
+  ) : (
+    <>
+      <button
+        className="gw-button gw-button-secondary"
+        onClick={() => navigate("/job")}
+      >
+        ← Change target role
+      </button>
+
+      <button
+        className="gw-button gw-button-primary"
+        onClick={() => navigate("/upload")}
+      >
+        Analyze another resume ↗
+      </button>
+    </>
+  )}
+</div>
       </div>
     </main>
   );

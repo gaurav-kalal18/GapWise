@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-
+const authRoutes = require("./routes/auth.routes");
 const healthRoutes = require("./routes/health.routes");
 const profileRoutes = require("./routes/profile.routes");
 const jobRoutes = require("./routes/job.routes");
@@ -8,14 +8,17 @@ const analysisRoutes = require("./routes/analysis.routes");
 const resumeRoutes = require("./routes/resume.routes");
 const roleRoutes = require("./routes/role.routes");
 const aiRoutes = require("./routes/ai.routes");
-
+const reportRoutes = require("./routes/report.routes");
 const app = express();
 
+
 app.use(
-    cors({
-        origin: "http://localhost:5173",
-    })
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
 );
+
 
 // Bound JSON input independently of individual route validation.
 app.use(express.json({limit:'128kb'}));
@@ -27,7 +30,8 @@ app.use("/api", analysisRoutes);
 app.use("/api", resumeRoutes);
 app.use("/api", roleRoutes);
 app.use("/api", aiRoutes);
-
+app.use("/api", authRoutes);
+app.use("/api", reportRoutes);
 // Last: uniform, non-sensitive responses for malformed bodies and upload failures.
 app.use((err,req,res,next) => {
     if (res.headersSent) return next(err);

@@ -99,13 +99,6 @@ function TargetRole() {
         );
       }
 
-console.table(
-  profile.requiredSkills.slice(0, 10).map((item) => ({
-    skill: item.skill,
-    canonicalSkillId: item.canonicalSkillId,
-    requirementType: item.requirementType,
-  }))
-);
 
       const response = await API.post(
         "/analysis/candidate",

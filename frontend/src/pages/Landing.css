@@ -680,3 +680,49 @@
     margin-top: 45px;
   }
 }
+
+
+/* Authentication-aware navbar */
+
+.gw-nav-signin {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.gw-nav-signin:hover {
+  color: var(--color-primary);
+}
+
+.gw-nav-status {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.gw-landing-logout-error {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 10px 24px;
+  color: var(--color-danger);
+  font-size: 13px;
+  text-align: right;
+}
+
+@media (max-width: 640px) {
+  .nav-actions {
+    gap: 12px;
+  }
+
+  .gw-nav-signin {
+    font-size: 12px;
+  }
+
+  .nav-actions .nav-button {
+    padding: 9px 11px;
+    font-size: 12px;
+  }
+}

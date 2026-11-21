@@ -1,0 +1,453 @@
+
+"use strict";
+
+const { createHash } = require("node:crypto");
+
+const {
+  compareSavedReports,
+  ComparisonError,
+} = require("../services/report.comparison.service");
+
+const {
+  validateCandidate,
+} = require("../middleware/request.validation");
+
+const {
+  sanitizeCandidateForStorage,
+} = require("../services/candidate.storage.service");
+
+const {
+  analyzeCandidateAgainstJob,
+} = require("../services/analysis.service");
+
+const {
+  saveAnalysisReport,
+  listReportsByUser,
+  getReportById,
+  deleteReportById,
+} = require("../services/report.repository");
+
+function badRequest(message) {
+  return Object.assign(new Error(message), {
+    status: 400,
+  });
+}
+
+function getTargetDetails(jobProfile) {
+  const assessmentType = jobProfile.assessment?.type;
+
+  if (assessmentType === "gapwise-role-rubric") {
+    if (
+      typeof jobProfile.roleId !== "string" ||
+      !jobProfile.roleId.trim()
+    ) {
+      throw badRequest("A valid target role is required.");
+    }
+
+    return {
+      targetType: "role",
+      targetKey: jobProfile.roleId,
+    };
+  }
+
+  if (assessmentType === "gapwise-custom-jd") {
+    if (
+      typeof jobProfile.description !== "string" ||
+      !jobProfile.description.trim()
+    ) {
+      throw badRequest(
+        "A job description is required."
+      );
+    }
+
+    // Generate a stable identifier so saved analyses
+    // can be compared against the same job description.
+    const fingerprint = createHash("sha256")
+      .update(
+        JSON.stringify({
+          title: jobProfile.title || "",
+          company: jobProfile.company || "",
+          description: jobProfile.description,
+        })
+      )
+      .digest("hex");
+
+    return {
+      targetType: "jd",
+      targetKey: `jd:${fingerprint}`,
+    };
+  }
+
+  throw badRequest(
+    "Only supported GapWise role and JD assessments can be saved."
+  );
+}
+
+/**
+ * POST /api/reports
+ *
+ * Calculate and save an analysis for the
+ * currently authenticated user.
+ */
+function createReport(req, res) {
+  res.set("Cache-Control", "no-store");
+
+  try {
+    const body = req.body;
+
+    if (
+      !body ||
+      typeof body !== "object" ||
+      Array.isArray(body)
+    ) {
+      throw badRequest("Invalid report request.");
+    }
+
+    // Saving requires explicit user consent.
+    if (body.saveConsent !== true) {
+      throw badRequest(
+        "Confirm that you want to save this analysis."
+      );
+    }
+
+    const {
+      candidateProfile,
+      jobProfile,
+      resumeLabel,
+    } = body;
+
+    if (
+      typeof resumeLabel !== "string" ||
+      !resumeLabel.trim() ||
+      resumeLabel.trim().length > 150
+    ) {
+      throw badRequest("Invalid resume label.");
+    }
+
+    // Validate using the existing analysis rules.
+    validateCandidate({
+      candidateProfile,
+      jobProfile,
+    });
+
+    const { targetType, targetKey } =
+      getTargetDetails(jobProfile);
+
+    // Always calculate analysis on the backend.
+    // Never trust browser-supplied scores, gaps,
+    // matches, roadmaps, or user IDs.
+    const analysis = analyzeCandidateAgainstJob(
+      candidateProfile,
+      jobProfile
+    );
+
+    // Minimize stored candidate information.
+    // Excludes contact and unrecognized fields,
+    // while preserving supported resume evidence.
+    //
+    // Free-text evidence may still contain PII.
+    const storedCandidateProfile =
+      sanitizeCandidateForStorage(candidateProfile);
+
+    // User identity comes from the server-side
+    // authenticated session, never the request body.
+    const saved = saveAnalysisReport({
+      userId: req.user.id,
+      resumeLabel: resumeLabel.trim(),
+      candidateProfile: storedCandidateProfile,
+      targetType,
+      targetKey,
+      targetProfile: jobProfile,
+      analysis,
+      assessmentVersion:
+        analysis.assessmentVersion ||
+        analysis.readiness?.evidenceRulesetVersion ||
+        jobProfile.assessment?.version ||
+        null,
+    });
+
+    return res.status(201).json({
+      message: "Analysis report saved successfully.",
+      reportId: saved.reportId,
+      resumeVersionId: saved.resumeVersionId,
+    });
+  } catch (error) {
+    if (
+      error.status === 400 ||
+      error.status === 404
+    ) {
+      return res.status(error.status).json({
+        message: error.message,
+      });
+    }
+
+    if (
+      typeof error.message === "string" &&
+      /assessment version mismatch/i.test(error.message)
+    ) {
+      return res.status(400).json({
+        message:
+          "Assessment version changed. Please analyze again.",
+      });
+    }
+
+    console.error(
+      "Report saving failed:",
+      error.name
+    );
+
+    return res.status(500).json({
+      message: "Unable to save analysis report.",
+    });
+  }
+}
+
+/**
+ * GET /api/reports
+ *
+ * Return paginated saved-report summaries
+ * for the currently authenticated user.
+ */
+function listMyReports(req, res) {
+  res.set("Cache-Control", "no-store");
+
+  try {
+    const pageText = req.query.page ?? "1";
+    const limitText = req.query.limit ?? "20";
+
+    // Strict numeric pagination validation.
+    if (
+      typeof pageText !== "string" ||
+      typeof limitText !== "string" ||
+      !/^[1-9]\d{0,8}$/.test(pageText) ||
+      !/^[1-9]\d{0,2}$/.test(limitText)
+    ) {
+      return res.status(400).json({
+        message: "Invalid pagination parameters.",
+      });
+    }
+
+    const page = Number(pageText);
+    const limit = Number(limitText);
+
+    if (
+      !Number.isSafeInteger(page) ||
+      !Number.isSafeInteger(limit) ||
+      limit > 50
+    ) {
+      return res.status(400).json({
+        message: "Invalid pagination parameters.",
+      });
+    }
+
+    const result = listReportsByUser(
+      req.user.id,
+      { page, limit }
+    );
+
+    return res.status(200).json(result);
+  } catch (error) {
+    if (error.status === 400) {
+      return res.status(400).json({
+        message: error.message,
+      });
+    }
+
+    console.error(
+      "Report history retrieval failed:",
+      error.name
+    );
+
+    return res.status(500).json({
+      message: "Unable to retrieve report history.",
+    });
+  }
+}
+
+/**
+ * GET /api/reports/:id
+ *
+ * Retrieve a saved report only when it belongs
+ * to the authenticated user.
+ */
+function getMyReport(req, res) {
+  res.set("Cache-Control", "no-store");
+
+  try {
+    const reportId = req.params.id;
+
+    const uuidPattern =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+    if (
+      typeof reportId !== "string" ||
+      !uuidPattern.test(reportId)
+    ) {
+      return res.status(400).json({
+        message: "Invalid report ID.",
+      });
+    }
+
+    const report = getReportById(
+      req.user.id,
+      reportId
+    );
+
+    if (!report) {
+      // Same response for unknown or other-user IDs.
+      return res.status(404).json({
+        message: "Report not found.",
+      });
+    }
+
+    return res.status(200).json({
+      report,
+    });
+  } catch (error) {
+    console.error(
+      "Saved report retrieval failed:",
+      error.name
+    );
+
+    return res.status(500).json({
+      message: "Unable to retrieve report.",
+    });
+  }
+}
+
+/**
+ * DELETE /api/reports/:id
+ *
+ * Permanently delete an authenticated user's
+ * saved report.
+ */
+function deleteMyReport(req, res) {
+  res.set("Cache-Control", "no-store");
+
+  try {
+    const reportId = req.params.id;
+
+    const uuidPattern =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+    if (
+      typeof reportId !== "string" ||
+      !uuidPattern.test(reportId)
+    ) {
+      return res.status(400).json({
+        message: "Invalid report ID.",
+      });
+    }
+
+    // Identity always comes from the session.
+    const deleted = deleteReportById(
+      req.user.id,
+      reportId
+    );
+
+    if (!deleted) {
+      return res.status(404).json({
+        message: "Report not found.",
+      });
+    }
+
+    return res.status(204).end();
+  } catch (error) {
+    console.error(
+      "Report deletion failed:",
+      error.name
+    );
+
+    return res.status(500).json({
+      message: "Unable to delete report.",
+    });
+  }
+}
+
+/**
+ * GET /api/reports/compare?first=UUID&second=UUID
+ *
+ * Compare two historical reports owned
+ * by the authenticated user.
+ *
+ * Does not recalculate or modify saved analyses.
+ */
+function compareMyReports(req, res) {
+  res.set("Cache-Control", "no-store");
+
+  try {
+    const { first, second } = req.query;
+
+    const uuidPattern =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+    if (
+      typeof first !== "string" ||
+      typeof second !== "string" ||
+      !uuidPattern.test(first) ||
+      !uuidPattern.test(second)
+    ) {
+      return res.status(400).json({
+        message: "Two valid report IDs are required.",
+      });
+    }
+
+    if (first === second) {
+      return res.status(400).json({
+        message: "Select two different reports.",
+      });
+    }
+
+    // Both reports must belong to the signed-in user.
+    const firstReport = getReportById(
+      req.user.id,
+      first
+    );
+
+    const secondReport = getReportById(
+      req.user.id,
+      second
+    );
+
+    if (!firstReport || !secondReport) {
+      return res.status(404).json({
+        message: "One or both reports were not found.",
+      });
+    }
+
+    const comparison = compareSavedReports(
+      firstReport,
+      secondReport
+    );
+
+    return res.status(200).json({
+      message: "Historical comparison completed.",
+      comparison,
+    });
+  } catch (error) {
+    if (error instanceof ComparisonError) {
+      return res.status(422).json({
+        message: error.message,
+        code: error.code,
+        comparable: false,
+      });
+    }
+
+    console.error(
+      "Report comparison failed:",
+      error.name
+    );
+
+    return res.status(500).json({
+      message: "Unable to compare saved reports.",
+    });
+  }
+}
+
+module.exports = {
+  createReport,
+  listMyReports,
+  getMyReport,
+  deleteMyReport,
+  compareMyReports,
+};
