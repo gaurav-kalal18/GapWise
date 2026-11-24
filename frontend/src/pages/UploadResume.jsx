@@ -118,7 +118,7 @@ const handleFile = (file) => {
           onClick={() => navigate("/")}
         >
           <span className="brand-mark">
-            â†—
+            &#8599;
           </span>
 
           GapWise
@@ -168,7 +168,7 @@ const handleFile = (file) => {
           }}
         >
           <div className="eyebrow">
-            STEP 01 â€” YOUR PROFILE
+            STEP 01 &mdash; YOUR PROFILE
           </div>
 
           <h1>
@@ -228,7 +228,7 @@ const handleFile = (file) => {
           {!selectedFile ? (
             <>
               <div className="upload-icon">
-                â†‘
+                &uarr;
               </div>
 
               <h2>
@@ -240,7 +240,7 @@ const handleFile = (file) => {
               </p>
 
               <span className="upload-format">
-                PDF only Â· Maximum 5 MB
+                PDF only &middot; Maximum 5 MB
               </span>
             </>
           ) : (
@@ -275,7 +275,7 @@ const handleFile = (file) => {
                   }
                 }}
               >
-                Ã—
+                &times;
               </button>
 
             </div>
@@ -300,7 +300,7 @@ const handleFile = (file) => {
             onClick={() => navigate("/")}
             disabled={isUploading}
           >
-            â† Back
+            &larr; Back
           </button>
 
           <button
@@ -316,7 +316,7 @@ const handleFile = (file) => {
               : "Continue"}
 
             {!isUploading && (
-              <span>â†’</span>
+              <span>&rarr;</span>
             )}
           </button>
 
